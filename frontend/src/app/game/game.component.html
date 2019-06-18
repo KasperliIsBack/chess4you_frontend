@@ -1,0 +1,27 @@
+<div class="clr-row" style="height: 100%;">
+  <div class="clr-col-2 clr-align-self-center">
+    <div class="card">
+      <div class="card-header">
+        <h1>Game: {{true}}</h1>
+      </div>
+      <div class="card-block">
+        <div class="card-title">
+          You: {{true}}
+        </div>
+        <div class="card-title">
+          Opponent: {{true}}
+        </div>
+      </div>
+    </div>   
+  </div>
+    <div class="clr-col-8 clr-align-self-start">
+      <div [hidden]="true" class="board">
+        <div *ngFor="let line of board; let y = index; let firstEven = even; let firstOdd = odd" class="row">
+          <div (click)="pieceHasClicked($event, field)" *ngFor="let field of line; let x = index; let secondEven = even; let secondOdd = odd" 
+            [ngClass]="((firstEven && secondEven)||(firstOdd && secondOdd))? 'has-background-black field' : 'has-background-white field'">
+            <img id="{{setIdOfImg(x, y)}}" src="{{getImgSrc(field)}}" class="has-image-centered" />
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

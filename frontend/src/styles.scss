@@ -1,0 +1,8 @@
+// Dark theme variables
+@import "../node_modules/@clr/ui/src/utils/theme.dark.clarity";
+
+// Your Application Theme File
+@import "./styles/theme.scss";
+
+// Clarity Component SCSS
+@import "../node_modules/@clr/ui/src/utils/components.clarity";

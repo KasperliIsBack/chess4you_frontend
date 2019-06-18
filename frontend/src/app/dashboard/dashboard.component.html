@@ -1,0 +1,50 @@
+<div class="clr-row clr-align-items-center clr-justify-content-center">
+  <div class="clr-col-lg">
+    <h1>Dashboard</h1>
+    <p></p>
+  </div>
+</div>
+<div class="clr-row">
+  <div class="clr-col-6">
+    <div class="card">
+      <div class="card-header">
+        Join a Game
+      </div>
+      <div class="card-block">
+        <form clrForm>
+          <clr-input-container>
+            <label>username</label>
+            <input clrInput type="text" name="example" required />
+            <clr-control-helper>Enter a username</clr-control-helper>
+            <clr-control-error>No valid username</clr-control-error>
+          </clr-input-container>
+          <button [disabled]="true" class="btn btn-lg">Search</button>
+        </form> 
+      </div>
+    </div>
+  </div>
+  <div class="clr-col-6">
+    <div class="card">
+      <div class="card-header">
+        Create a Game
+      </div>
+      <div class="card-block">
+        <form clrForm>
+          <clr-input-container>
+            <label>username</label>
+            <input clrInput type="text" name="example" required />
+            <clr-control-helper>Enter a username</clr-control-helper>
+            <clr-control-error>No valid username</clr-control-error>
+          </clr-input-container>
+          <clr-input-container>
+            <label>gamename</label>
+            <input clrInput type="text" name="example" required />
+            <clr-control-helper>Enter a gamename</clr-control-helper>
+            <clr-control-error>No valid gamename</clr-control-error>
+          </clr-input-container>
+          <button [disabled]="true" class="btn btn-lg">Create</button>
+        </form>  
+      </div>
+    </div>
+  </div>
+</div>
