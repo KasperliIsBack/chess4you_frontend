@@ -16,7 +16,7 @@ const urlGameServer = 'https://172.16.1.198:8081';
   styleUrls: ['./game.component.scss']
 })
 
-export class GameComponent {
+export class GameComponent implements OnInit{
 
   board: Field[][] = [];
 
@@ -36,6 +36,12 @@ export class GameComponent {
     movements: Movement[] = [];
     info: Info;
   
+    async ngOnInit() {
+      this.lobbyUUID = this.route.snapshot.paramMap.get('lobbyUuid');
+      this.playerUUID = this.route.snapshot.paramMap.get('playerUuid');
+      await this.gameController.connect(urlGameServer, this.playerUUID, this.lobbyUUID);
+    }
+
     setCoordinate(x: number, y: number) {
       if (this.reverse) {
         return (7 - y) + ',' + (7 - x);
