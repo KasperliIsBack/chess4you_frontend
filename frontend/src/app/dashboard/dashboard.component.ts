@@ -46,8 +46,11 @@ export class DashboardComponent implements OnInit {
 
   openSearchGame(): void {
     this.searchBtnState = ClrLoadingState.LOADING;
-    const lobby = this.searchGame();
-    this.joinGame(lobby);
+    this.searchGame().then(
+      (lobby) => {
+        this.joinGame(lobby);
+      }
+    );
   }
 
   openCreateGame(): void {
@@ -71,9 +74,15 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  joinGame(lobby: Lobby): void {
+  async joinGame(lobby: Lobby) {
     if (lobby != null) {
-        const connectionData: ConnectionData = this.lobbyHandler.joinLobby(lobby.lobbyUuid, this.formGroupJoin.get('userName').value);
+        let connectionData: ConnectionData;
+        await this.lobbyHandler.joinLobby(lobby.lobbyUuid, this.formGroupJoin.get('userName').value)
+        .then(
+          (data) => {
+            connectionData = data;
+          }
+        );
         console.log(connectionData);
         this.searchBtnState = ClrLoadingState.DEFAULT;
         const url: string = '/game' + connectionData.lobbyUuid + '/' + connectionData.playerUuid;
@@ -84,8 +93,11 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  searchGame(): Lobby {
-    this.listLobby = this.lobbyHandler.getListLobby();
+  async searchGame(): Promise<Lobby> {
+    await this.lobbyHandler.getListLobby()
+    .then((list) => {
+      this.listLobby = list;
+    });
     console.log(this.listLobby);
     for (const lobby of this.listLobby) {
       if (!lobby.playerTwo) {

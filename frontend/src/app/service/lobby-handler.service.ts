@@ -10,23 +10,21 @@ export class LobbyHandlerService {
 
   constructor(private lobbyController: LobbycontrollerService) { }
 
-  async getListLobby(): Lobby[] {
+  async getListLobby(): Promise<Lobby[]> {
     let tmpListLobby: Lobby[];
 
     await this.lobbyController.getListLobby()
     .toPromise()
-    .then(
-      (list) => {
-        tmpListLobby = list;
-      }
-    );
+    .then((list) => {
+      tmpListLobby = list;
+    });
     return tmpListLobby;
   }
 
-  joinLobby(lobbyUuid: string, playerName: string): ConnectionData {
+  async joinLobby(lobbyUuid: string, playerName: string): Promise<ConnectionData> {
     let connectionData: ConnectionData;
 
-    this.lobbyController.joinLobby(lobbyUuid, playerName)
+    await this.lobbyController.joinLobby(lobbyUuid, playerName)
     .toPromise()
     .then(
       (tmpConnectionData) => {
