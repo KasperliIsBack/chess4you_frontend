@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Url } from 'url';
 import { Observable } from 'rxjs';
 import { GameData } from '../data/game-data';
 import { Board } from '../data/board/board';
-import { setTimeout } from 'timers';
 import { GamecontrollerService } from './gamecontroller.service';
+import { Position } from '../data/board/position';
+import { Movement } from '../data/board/movement';
+import { Field } from '../data/board/field';
 
 
 
@@ -18,7 +19,7 @@ export class GamehandlerService {
 
   constructor(private gamecontrollerService: GamecontrollerService) { }
 
-  connect(urlGameServer: Url, uuidLobby: string, uuidPlayer: string): string{
+  connect(urlGameServer: any, uuidLobby: string, uuidPlayer: string) {
     this.gamecontrollerService
     .connect(urlGameServer, uuidLobby, uuidPlayer)
     .then((data) => {
@@ -26,12 +27,12 @@ export class GamehandlerService {
     });
   }
 
-  getTurn(urlGameServer: Url, uuidPlayer: string, uuidLobby: string, position: Position): Observable<Movement[]> {
+  getTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, position: Position): Observable<Movement[]> {
     return this.gamecontrollerService
     .getTurn(urlGameServer, uuidPlayer, uuidLobby, position);
   }
 
-  doTurn(urlGameServer: Url, uuidPlayer: string, uuidLobby: string, movement: Movement): Observable<Field[][]> {
+  doTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, movement: Movement): Observable<Field[][]> {
     return this.gamecontrollerService
     .doTurn(urlGameServer, uuidPlayer, uuidLobby, movement);
   }

@@ -1,8 +1,6 @@
-import { Observable } from 'rxjs';
-import { GameData } from '../data/game-data';
-import { Field } from '../data/board/field';
 import { Url } from 'url';
 import { Movement } from '../data/board/movement';
+import { Position } from '../data/board/position';
 
 export interface IGameController {
     connect(urlGameServer: Url, uuidLobby: string, uuidPlayer: string);

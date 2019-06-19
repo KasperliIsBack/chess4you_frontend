@@ -1,6 +1,6 @@
 <div class="clr-row clr-align-items-center clr-justify-content-center">
   <div class="clr-col-lg">
-    <h1>Dashboard</h1>
+    <h1>Hi and welcome to our chess game!</h1>
     <p></p>
   </div>
 </div>
@@ -18,7 +18,7 @@
                 <clr-icon shape="warning-standard" class="is-solid"></clr-icon>
               </div>
               <div class="alert-text">
-                No game available, please wait or create one!
+                No game available, please wait, or create one!
               </div>
             </div>
           </div>
@@ -28,11 +28,11 @@
         </div>
         <form [formGroup]="formGroupJoin" clrForm>
           <clr-input-container>
-            <label>username</label>
+            <label>Username</label>
             <input clrInput type="text" name="example" required formControlName="userName"/>
             <clr-control-helper>Enter a username</clr-control-helper>
-            <clr-control-error>No valid username</clr-control-error>
-          </clr-input-container>
+            <clr-control-error>Not a valid username</clr-control-error>
+          </clr-input-container><br>
           <button [disabled]="formGroupJoin.invalid" [clrLoading]="searchBtnState" type="submit" class="btn btn-lg btn-success-outline" (click)="openSearchGame()">Search</button>
         </form> 
       </div>
@@ -41,7 +41,7 @@
   <div class="clr-col-sm-12 clr-col-lg-4">
     <div class="card">
       <div class="card-header">
-        Create a Game
+        Create a game
       </div>
       <div class="card-block">
         <div [hidden]="!hasCreateError" class="alert alert-warning alert-sm" role="alert">
@@ -51,7 +51,7 @@
                 <clr-icon shape="warning-standard" class="is-solid"></clr-icon>
               </div>
               <div class="alert-text">
-               Game couldn't be created, please try later!
+               Couldn't create the game, please try again later!
               </div>
             </div>
           </div>
@@ -67,13 +67,13 @@
             <clr-control-error>No valid username</clr-control-error>
           </clr-input-container>
           <clr-input-container>
-            <label>gamename</label>
+            <label>Game name</label>
             <input clrInput type="text" name="example" required formControlName="userName"/>
-            <clr-control-helper>Enter a gamename</clr-control-helper>
-            <clr-control-error>No valid gamename</clr-control-error>
+            <clr-control-helper>Enter a game name</clr-control-helper>
+            <clr-control-error>No valid game name</clr-control-error>
           </clr-input-container>
           <clr-radio-container clrInline>
-            <label>color</label>
+            <label>Color</label>
             <clr-radio-wrapper>
               <input type="radio" clrRadio name="chooseColor" required value="White" formControlName="chooseColor"/>
               <label>White</label>
@@ -84,7 +84,7 @@
             </clr-radio-wrapper>
             <clr-control-helper>Helper text</clr-control-helper>
             <clr-control-error>This field is required!</clr-control-error>
-          </clr-radio-container>
+          </clr-radio-container><br>
           <button [disabled]="formGroupCreate.invalid" [clrLoading]="createBtnState" type="submit" class="btn btn-lg btn-success-outline" (click)="openCreateGame()">Create</button>
         </form>  
       </div>
