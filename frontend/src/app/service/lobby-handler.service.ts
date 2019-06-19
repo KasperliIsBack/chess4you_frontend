@@ -10,10 +10,10 @@ export class LobbyHandlerService {
 
   constructor(private lobbyController: LobbycontrollerService) { }
 
-  getListLobby(): Lobby[] {
-    let tmpListLobby: Lobby[] = [];
+  async getListLobby(): Lobby[] {
+    let tmpListLobby: Lobby[];
 
-    this.lobbyController.getListLobby()
+    await this.lobbyController.getListLobby()
     .toPromise()
     .then(
       (list) => {
@@ -38,14 +38,14 @@ export class LobbyHandlerService {
 
   initLobby(lobbyName: string, playerName: string, chooseColor: string): ConnectionData {
     let connectionData: ConnectionData;
-    let chooseColorNumber = 0;
+    let chooseColorNumber = '0';
 
     switch (chooseColor) {
       case 'White':
-        chooseColorNumber = 0;
+        chooseColorNumber = '0';
         break;
       case 'Black':
-        chooseColorNumber = 1;
+        chooseColorNumber = '1';
         break;
     }
 

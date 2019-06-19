@@ -4,11 +4,12 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Lobby } from '../data/lobby';
 import { ConnectionData } from '../data/connection-data';
+import { Const } from '../data/const/const';
 
-const urlLobbyServer = 'https://172.16.1.198:8082';
+const urlLobbyServer = new Const().const.getLobbyUrl;
 const httpHeaderOptions = {
   headers: new HttpHeaders({
-    'Content-Type' : 'application/json'
+    'Content-Type' : 'application/x-www-form-urlencoded'
   })
 };
 
@@ -28,7 +29,7 @@ export class LobbycontrollerService implements ILobbyController {
 
     return this.http.get<Lobby>(urlLobbyServer + '/getLobby', { params: httpParams });
   }
-  initLobby(lobbyName: string, playerName: string, chooseColor: number): Observable<ConnectionData> {
+  initLobby(lobbyName: string, playerName: string, chooseColor: string): Observable<ConnectionData> {
     return this.http.post<ConnectionData>(urlLobbyServer + '/initLobby', {lobbyName, playerName, chooseColor}, httpHeaderOptions);
   }
   joinLobby(lobbyUuid: string, playerName: string): Observable<ConnectionData> {
