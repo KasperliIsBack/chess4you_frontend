@@ -4,9 +4,9 @@ import { GameData } from '../data/game-data';
 import { Board } from '../data/board/board';
 import { IGameController } from '../interface/igame-controller';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Url } from 'url';
 import { Field } from '../data/board/field';
 import { Movement } from '../data/board/movement';
+import { Position } from '../data/board/position';
 
 const httpHeaderOptions =  {
   headers: new HttpHeaders({
@@ -22,7 +22,7 @@ export class GamecontrollerService implements IGameController{
 
   constructor(private http: HttpClient) { }
 
-  async connect(urlGameServer: Url, uuidLobby: string, uuidPlayer: string): Promise<string> {
+  async connect(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Promise<string> {
     const formData: FormData = new FormData();
     let message: string;
 
@@ -38,7 +38,7 @@ export class GamecontrollerService implements IGameController{
     return message;
   }
 
-  getInfo(urlGameServer: Url, uuidLobby: string, uuidPlayer: string): Observable<GameData> {
+  getInfo(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Observable<GameData> {
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)
     .set('playerUuid', uuidPlayer);
@@ -46,7 +46,7 @@ export class GamecontrollerService implements IGameController{
     return this.http.get<GameData>(urlGameServer + '/getInfo', { params: httpParams });
   }
 
-  async getBoard(urlGameServer: Url, uuidLobby: string, uuidPlayer: string) {
+  async getBoard(urlGameServer: any, uuidLobby: string, uuidPlayer: string) {
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)
     .set('playerUuid', uuidPlayer);
@@ -61,7 +61,7 @@ export class GamecontrollerService implements IGameController{
     return chessboard;
   }
 
-  getTurn(urlGameServer: Url, uuidPlayer: string, uuidLobby: string, position: Position): Observable<Movement[]> {
+  getTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, position: Position): Observable<Movement[]> {
     const stringifiedPosition = JSON.stringify(position);
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)
@@ -71,7 +71,7 @@ export class GamecontrollerService implements IGameController{
     return this.http.get<Movement[]>(urlGameServer + '/getTurn', { params: httpParams});
   }
 
-  doTurn(urlGameServer: Url, uuidPlayer: string, uuidLobby: string, movement: Movement): Observable<Field[][]> {
+  doTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, movement: Movement): Observable<Field[][]> {
     const stringifiedMovement = JSON.stringify(movement);
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)

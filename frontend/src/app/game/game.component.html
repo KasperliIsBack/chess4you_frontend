@@ -16,7 +16,7 @@
   </div>
     <div class="clr-col-8 clr-align-self-start">
       <div [hidden]="true" class="board">
-        <div *ngFor="let line of board; let y = index; let firstEven = even; let firstOdd = odd" class="row">
+        <div *ngFor="let line of this.gameHandler.board | async ; let y = index; let firstEven = even; let firstOdd = odd" class="row">
           <div (click)="pieceHasClicked($event, field)" *ngFor="let field of line; let x = index; let secondEven = even; let secondOdd = odd" 
             [ngClass]="((firstEven && secondEven)||(firstOdd && secondOdd))? 'has-background-black field' : 'has-background-white field'">
             <img id="{{setIdOfImg(x, y)}}" src="{{getImgSrc(field)}}" class="has-image-centered" />
