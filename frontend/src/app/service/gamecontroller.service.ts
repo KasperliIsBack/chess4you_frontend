@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { IGameController } from '../interface/igame-controller';
 import { Observable } from 'rxjs';
-import { Url } from 'url';
-import { Movement } from '../data/board/movement';
 import { GameData } from '../data/game-data';
+import { Board } from '../data/board/board';
+import { IGameController } from '../interface/igame-controller';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Url } from 'url';
 import { Field } from '../data/board/field';
-import { HttpHeaders, HttpParams, HttpClient } from '@angular/common/http';
+import { Movement } from '../data/board/movement';
 
 const httpHeaderOptions =  {
   headers: new HttpHeaders({
@@ -17,10 +18,7 @@ const httpHeaderOptions =  {
   providedIn: 'root'
 })
 
-export class GamecontrollerService implements IGameController {
-
-  infoData: Observable<GameData>;
-  board: Observable<Field[][]>;
+export class GamecontrollerService implements IGameController{
 
   constructor(private http: HttpClient) { }
 
@@ -39,6 +37,7 @@ export class GamecontrollerService implements IGameController {
     );
     return message;
   }
+
   getInfo(urlGameServer: Url, uuidLobby: string, uuidPlayer: string): Observable<GameData> {
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)
@@ -51,15 +50,15 @@ export class GamecontrollerService implements IGameController {
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)
     .set('playerUuid', uuidPlayer);
-    let board: Field[][] = [];
+    let chessboard: Board = new Board();
 
     await this.http.get<Field[][]>(urlGameServer + '/getBoard', { params: httpParams})
     .subscribe(
       (rawBoard) => {
-        board = rawBoard;
+        chessboard.board = rawBoard;
       }
     );
-    return board;
+    return chessboard;
   }
 
   getTurn(urlGameServer: Url, uuidPlayer: string, uuidLobby: string, position: Position): Observable<Movement[]> {

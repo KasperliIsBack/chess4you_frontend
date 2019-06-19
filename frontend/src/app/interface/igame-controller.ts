@@ -5,9 +5,6 @@ import { Url } from 'url';
 import { Movement } from '../data/board/movement';
 
 export interface IGameController {
-    infoData: Observable<GameData>;
-    board: Observable<Field[][]>;
-
     connect(urlGameServer: Url, uuidLobby: string, uuidPlayer: string);
     getInfo(urlGameServer: Url, uuidLobby: string, uuidPlayer: string);
     getBoard(urlGameServer: Url, uuidLobby: string, uuidPlayer: string);
