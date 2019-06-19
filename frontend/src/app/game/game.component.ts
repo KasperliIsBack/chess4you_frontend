@@ -21,9 +21,9 @@ export class GameComponent implements OnInit {
     alert("hit");
   }
   setIdOfImg(x: number, y: number): string {
-
+    return "andir";
   }
   getImgSrc(field: Field): string {
-
+    return "test";
   }
 }

@@ -4,45 +4,88 @@
     <p></p>
   </div>
 </div>
-<div class="clr-row">
-  <div class="clr-col-6">
+<div class="clr-row clr-justify-content-around">
+  <div class="clr-col-sm-12 clr-col-lg-4">
     <div class="card">
       <div class="card-header">
         Join a Game
       </div>
       <div class="card-block">
-        <form clrForm>
+        <div [hidden]="!hasJoinError" class="alert alert-warning alert-sm" role="alert">
+          <div class="alert-items">
+            <div class="alert-item static">
+              <div class="alert-icon-wrapper">
+                <clr-icon shape="warning-standard" class="is-solid"></clr-icon>
+              </div>
+              <div class="alert-text">
+                No game available, please wait or create one!
+              </div>
+            </div>
+          </div>
+          <button (click)="toggleJoinError()" class="button" class="close" aria-label="Close">
+            <clr-icon aria-hidden="true" shape="close"></clr-icon>
+          </button>
+        </div>
+        <form [formGroup]="formGroupJoin" clrForm>
           <clr-input-container>
             <label>username</label>
-            <input clrInput type="text" name="example" required />
+            <input clrInput type="text" name="example" required formControlName="userName"/>
             <clr-control-helper>Enter a username</clr-control-helper>
             <clr-control-error>No valid username</clr-control-error>
           </clr-input-container>
-          <button [disabled]="true" class="btn btn-lg">Search</button>
+          <button [disabled]="formGroupJoin.invalid" [clrLoading]="searchBtnState" type="submit" class="btn btn-lg btn-success-outline" (click)="openSearchGame()">Search</button>
         </form> 
       </div>
     </div>
   </div>
-  <div class="clr-col-6">
+  <div class="clr-col-sm-12 clr-col-lg-4">
     <div class="card">
       <div class="card-header">
         Create a Game
       </div>
       <div class="card-block">
-        <form clrForm>
+        <div [hidden]="!hasCreateError" class="alert alert-warning alert-sm" role="alert">
+          <div class="alert-items">
+            <div class="alert-item static">
+              <div class="alert-icon-wrapper">
+                <clr-icon shape="warning-standard" class="is-solid"></clr-icon>
+              </div>
+              <div class="alert-text">
+               Game couldn't be created, please try later!
+              </div>
+            </div>
+          </div>
+          <button (click)="toggleCreateError()" class="button" class="close" aria-label="Close">
+            <clr-icon aria-hidden="true" shape="close"></clr-icon>
+          </button>
+        </div>
+        <form [formGroup]="formGroupCreate" clrForm>
           <clr-input-container>
             <label>username</label>
-            <input clrInput type="text" name="example" required />
+            <input clrInput type="text" name="example" required formControlName="lobbyName"/>
             <clr-control-helper>Enter a username</clr-control-helper>
             <clr-control-error>No valid username</clr-control-error>
           </clr-input-container>
           <clr-input-container>
             <label>gamename</label>
-            <input clrInput type="text" name="example" required />
+            <input clrInput type="text" name="example" required formControlName="userName"/>
             <clr-control-helper>Enter a gamename</clr-control-helper>
             <clr-control-error>No valid gamename</clr-control-error>
           </clr-input-container>
-          <button [disabled]="true" class="btn btn-lg">Create</button>
+          <clr-radio-container clrInline>
+            <label>color</label>
+            <clr-radio-wrapper>
+              <input type="radio" clrRadio name="choosenColor" required value="White" formControlName="choosenColor"/>
+              <label>White</label>
+            </clr-radio-wrapper>
+            <clr-radio-wrapper>
+              <input type="radio" clrRadio name="choosenColor" required value="Black" formControlName="choosenColor"/>
+              <label>Black</label>
+            </clr-radio-wrapper>
+            <clr-control-helper>Helper text</clr-control-helper>
+            <clr-control-error>This field is required!</clr-control-error>
+          </clr-radio-container>
+          <button [disabled]="formGroupCreate.invalid" [clrLoading]="createBtnState" type="submit" class="btn btn-lg btn-success-outline" (click)="openCreateGame()">Create</button>
         </form>  
       </div>
     </div>
