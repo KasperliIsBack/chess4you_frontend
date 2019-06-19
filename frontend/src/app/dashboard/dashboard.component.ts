@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { LobbycontrollerService } from '../service/lobbycontroller.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ClrLoadingState } from '@clr/angular';
 import { LobbyHandlerService } from '../service/lobby-handler.service';
 import { Lobby } from '../data/lobby';
-import { Url } from 'url';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,7 +27,7 @@ export class DashboardComponent implements OnInit {
       Validators.required,
       Validators.minLength(5),
     ]),
-    choosenColor: new FormControl('Black', [
+    chooseColor: new FormControl('Black', [
       Validators.required,
     ])
   });
@@ -57,14 +55,14 @@ export class DashboardComponent implements OnInit {
   }
 
   createGame(): void {
-    const url: Url = this.lobbyHandler.initLobby(this.formGroupCreate.get('lobbyName').value,
+    const url: string = this.lobbyHandler.initLobby(this.formGroupCreate.get('lobbyName').value,
     this.formGroupJoin.get('userName').value,
-    this.formGroupCreate.get('choosenColor').value);
-    console.log(url.href);
+    this.formGroupCreate.get('chooseColor').value);
+    console.log(url);
 
-    if (url.href !== 'undefined') {
+    if (url !== 'undefined') {
       this.createBtnState = ClrLoadingState.SUCCESS;
-      window.open(url.href, '_self');
+      window.open(url, '_self');
     } else {
       this.hasCreateError = true;
       this.createBtnState = ClrLoadingState.ERROR;
@@ -73,10 +71,10 @@ export class DashboardComponent implements OnInit {
 
   joinGame(lobby: Lobby): void {
     if (lobby != null) {
-        const url: Url = this.lobbyHandler.joinLobby(lobby.lobbyUuid, this.formGroupJoin.get('userName').value);
+        const url: string = this.lobbyHandler.joinLobby(lobby.lobbyUuid, this.formGroupJoin.get('userName').value);
         console.log(url);
         this.searchBtnState = ClrLoadingState.DEFAULT;
-        window.open(url.href, '_self');
+        window.open(url, '_self');
     } else {
       this.hasJoinError = true;
       this.searchBtnState = ClrLoadingState.ERROR;

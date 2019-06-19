@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LobbycontrollerService } from './lobbycontroller.service';
 import { Lobby } from '../data/lobby';
-import { Url } from 'url';
 
 @Injectable({
   providedIn: 'root'
@@ -23,8 +22,8 @@ export class LobbyHandlerService {
     return tmpListLobby;
   }
 
-  joinLobby(lobbyUuid: string, playerName: string): Url {
-    let tmpUrl: Url;
+  joinLobby(lobbyUuid: string, playerName: string): string {
+    let tmpUrl: string;
 
     this.lobbyController.joinLobby(lobbyUuid, playerName)
     .toPromise()
@@ -36,10 +35,20 @@ export class LobbyHandlerService {
     return tmpUrl;
   }
 
-  initLobby(lobbyName: string, playerName: string, chooseColor: string): Url {
-    let tmpUrl: Url;
+  initLobby(lobbyName: string, playerName: string, chooseColor: string): string {
+    let tmpUrl: string;
+    let chooseColorNumber = 0;
 
-    this.lobbyController.initLobby(lobbyName, playerName, chooseColor)
+    switch (chooseColor) {
+      case 'White':
+        chooseColorNumber = 0;
+        break;
+      case 'Black':
+        chooseColorNumber = 1;
+        break;
+    }
+
+    this.lobbyController.initLobby(lobbyName, playerName, chooseColorNumber)
     .toPromise()
     .then(
       (url) => {
