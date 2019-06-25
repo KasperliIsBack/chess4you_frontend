@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LobbycontrollerService } from './lobbycontroller.service';
 import { Lobby } from '../data/lobby';
+import { ConnectionData } from '../data/connection-data';
 
 @Injectable({
   providedIn: 'root'
@@ -9,10 +10,10 @@ export class LobbyHandlerService {
 
   constructor(private lobbyController: LobbycontrollerService) { }
 
-  getListLobby(): Lobby[] {
-    let tmpListLobby: Lobby[] = [];
+  async getListLobby(): Lobby[] {
+    let tmpListLobby: Lobby[];
 
-    this.lobbyController.getListLobby()
+    await this.lobbyController.getListLobby()
     .toPromise()
     .then(
       (list) => {
@@ -22,39 +23,39 @@ export class LobbyHandlerService {
     return tmpListLobby;
   }
 
-  joinLobby(lobbyUuid: string, playerName: string): string {
-    let tmpUrl: string;
+  joinLobby(lobbyUuid: string, playerName: string): ConnectionData {
+    let connectionData: ConnectionData;
 
     this.lobbyController.joinLobby(lobbyUuid, playerName)
     .toPromise()
     .then(
-      (url) => {
-        tmpUrl = url;
+      (tmpConnectionData) => {
+        connectionData = tmpConnectionData;
       }
     );
-    return tmpUrl;
+    return connectionData;
   }
 
-  initLobby(lobbyName: string, playerName: string, chooseColor: string): string {
-    let tmpUrl: string;
-    let chooseColorNumber = 0;
+  initLobby(lobbyName: string, playerName: string, chooseColor: string): ConnectionData {
+    let connectionData: ConnectionData;
+    let chooseColorNumber = '0';
 
     switch (chooseColor) {
       case 'White':
-        chooseColorNumber = 0;
+        chooseColorNumber = '0';
         break;
       case 'Black':
-        chooseColorNumber = 1;
+        chooseColorNumber = '1';
         break;
     }
 
     this.lobbyController.initLobby(lobbyName, playerName, chooseColorNumber)
     .toPromise()
     .then(
-      (url) => {
-        tmpUrl = url;
+      (tmpConnectionData) => {
+        connectionData = tmpConnectionData;
       }
     );
-    return tmpUrl;
+    return connectionData;
   }
 }
