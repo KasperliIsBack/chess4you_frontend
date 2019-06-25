@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { GameData } from '../data/game-data';
-import { Board } from '../data/board/board';
+import { GameData } from '../../data/game/game-data';
+import { Board } from '../../data/board/board';
 import { GamecontrollerService } from './gamecontroller.service';
-import { Position } from '../data/board/position';
-import { Movement } from '../data/board/movement';
-import { Field } from '../data/board/field';
+import { Position } from '../../data/board/position';
+import { Movement } from '../../data/board/movement';
+import { Field } from '../../data/board/field';
 
 
 

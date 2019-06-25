@@ -1,4 +1,4 @@
-import { Color } from 'src/app/enum/color.enum';
+import { Color } from 'src/app/data/enum/color.enum';
 import { Position } from './position';
 
 export class Piece {

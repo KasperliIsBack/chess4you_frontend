@@ -1,4 +1,4 @@
-import { Player } from './Player';
+import { Player } from '../player/player';
 import { Color } from '../enum/color.enum';
 
 export class Lobby {

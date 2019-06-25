@@ -1,23 +1,26 @@
-.board{
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    height: 100%;
-    widows: 100%;
+.board {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: 100%;
+  widows: 100%;
 }
-.row{
-    margin: 0px;
-    padding: 0px;
+.row {
+  margin: 0px;
+  padding: 0px;
 }
-.field{
-    margin: 0px;
-    padding: 0px;
-    height: 75px;
-    width: 75px;
+.field {
+  margin: 0px;
+  padding: 0px;
+  height: 75px;
+  width: 75px;
 }
-.has-background-black{
-    background-color:#AA4500;
+.has-background-dark {
+  background-color:#AA4500;
 }
-.has-background-white{
-    background-color:#FFCD97;
+.has-background-light {
+  background-color:#FFCD97;
+}
+.has-background-success{
+  background-color: #48960C;
 }

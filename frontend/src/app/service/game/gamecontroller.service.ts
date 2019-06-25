@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { GameData } from '../data/game-data';
-import { Board } from '../data/board/board';
-import { IGameController } from '../interface/igame-controller';
+import { GameData } from '../../data/game/game-data';
+import { Board } from '../../data/board/board';
+import { IGameController } from '../../data/interface/igame-controller';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Field } from '../data/board/field';
-import { Movement } from '../data/board/movement';
-import { Position } from '../data/board/position';
+import { Field } from '../../data/board/field';
+import { Movement } from '../../data/board/movement';
+import { Position } from '../../data/board/position';
 
 const httpHeaderOptions =  {
   headers: new HttpHeaders({

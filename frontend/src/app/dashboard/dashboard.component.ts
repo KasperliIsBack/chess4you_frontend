@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ClrLoadingState } from '@clr/angular';
-import { LobbyHandlerService } from '../service/lobby-handler.service';
-import { Lobby } from '../data/lobby';
-import { ConnectionData } from '../data/connection-data';
+import { LobbyHandlerService } from '../service/lobby/lobby-handler.service';
+import { Lobby } from '../data/lobby/lobby';
+import { ConnectionData } from '../data/game/connection-data';
+import { Router, NavigationExtras } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,7 +40,7 @@ export class DashboardComponent implements OnInit {
   hasCreateError = false;
   listLobby: Lobby[] = [];
 
-  constructor(private lobbyHandler: LobbyHandlerService) { }
+  constructor(private lobbyHandler: LobbyHandlerService, private router: Router) { }
 
   ngOnInit() {
   }
@@ -58,24 +59,37 @@ export class DashboardComponent implements OnInit {
     const lobby = this.createGame();
   }
 
-  createGame(): void {
-    const connectionData: ConnectionData = this.lobbyHandler.initLobby(this.formGroupCreate.get('lobbyName').value,
-    this.formGroupJoin.get('userName').value,
-    this.formGroupCreate.get('chooseColor').value);
+  async createGame(): Promise<void> {
+    let connectionData: ConnectionData;
+    const lobbyName = this.formGroupCreate.get('lobbyName').value;
+    const userName = this.formGroupCreate.get('userName').value;
+    const chooseColor = this.formGroupCreate.get('chooseColor').value;
+    await this.lobbyHandler.initLobby(lobbyName, userName, chooseColor)
+    .then(
+      (data) => {
+        connectionData = data;
+      }
+    );
     console.log(connectionData);
 
-    if (connectionData != null) {
+    if (this.isConnectionDataValid(connectionData)) {
       this.createBtnState = ClrLoadingState.SUCCESS;
-      const url: string = '/game' + connectionData.lobbyUuid + '/' + connectionData.playerUuid;
-      window.open(url, '_self');
+
+      this.router.navigate(['/game'],
+      { state:
+        { data: {
+          lobbyUuid: connectionData.lobbyUuid,
+          playerUuid: connectionData.playerUuid }
+        }
+      });
     } else {
       this.hasCreateError = true;
       this.createBtnState = ClrLoadingState.ERROR;
     }
   }
 
-  async joinGame(lobby: Lobby) {
-    if (lobby != null) {
+  async joinGame(lobby: Lobby): Promise<void> {
+    if (!lobby) {
         let connectionData: ConnectionData;
         await this.lobbyHandler.joinLobby(lobby.lobbyUuid, this.formGroupJoin.get('userName').value)
         .then(
@@ -84,9 +98,20 @@ export class DashboardComponent implements OnInit {
           }
         );
         console.log(connectionData);
-        this.searchBtnState = ClrLoadingState.DEFAULT;
-        const url: string = '/game' + connectionData.lobbyUuid + '/' + connectionData.playerUuid;
-        window.open(url, '_self');
+
+        if (this.isConnectionDataValid(connectionData)) {
+          this.searchBtnState = ClrLoadingState.DEFAULT;
+          this.router.navigate(['/game'],
+          { state:
+            { data: {
+              lobbyUuid: connectionData.lobbyUuid,
+              playerUuid: connectionData.playerUuid }
+            }
+          });
+        } else {
+          this.hasJoinError = true;
+          this.searchBtnState = ClrLoadingState.ERROR;
+        }
     } else {
       this.hasJoinError = true;
       this.searchBtnState = ClrLoadingState.ERROR;
@@ -120,4 +145,12 @@ export class DashboardComponent implements OnInit {
     this.formGroupCreate.reset();
   }
 
+  isConnectionDataValid(connectionData: ConnectionData): boolean {
+    if (connectionData.lobbyUuid || 0 === connectionData.lobbyUuid.length) {
+      if (connectionData.playerUuid || 0 === connectionData.playerUuid.length) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -1,6 +1,6 @@
-import { Player } from './Player';
+import { Player } from '../player/player';
 import { Color } from '../enum/color.enum';
-import { Movement } from './board/movement';
+import { Movement } from '../board/movement';
 
 export class GameData {
     gameUuid: string;
