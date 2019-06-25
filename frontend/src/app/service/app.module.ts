@@ -9,22 +9,26 @@ import { HttpClientModule } from '@angular/common/http';
 import { DashboardComponent } from '../dashboard/dashboard.component';
 import { GameComponent } from '../game/game.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { LobbysComponent } from '../lobbys/lobbys.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    DashboardComponent,
-    GameComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    ClarityModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    ReactiveFormsModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+   declarations: [
+      AppComponent,
+      DashboardComponent,
+      GameComponent,
+      LobbysComponent
+   ],
+   imports: [
+      BrowserModule,
+      AppRoutingModule,
+      ClarityModule,
+      BrowserAnimationsModule,
+      HttpClientModule,
+      ReactiveFormsModule
+   ],
+   providers: [],
+   bootstrap: [
+      AppComponent
+   ]
 })
 export class AppModule { }
