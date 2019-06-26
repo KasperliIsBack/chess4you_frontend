@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { GameData } from '../../data/game/game-data';
-import { Board } from '../../data/board/board';
 import { IGameController } from '../../data/interface/igame-controller';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Field } from '../../data/board/field';
@@ -24,60 +22,53 @@ export class GamecontrollerService implements IGameController{
 
   async connect(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Promise<string> {
     const formData: FormData = new FormData();
-    let message: string;
-
     formData.append('lobbyUuid', uuidLobby);
     formData.append('playerUuid', uuidPlayer);
 
-    await this.http.post(urlGameServer + '/connect', formData)
-    .subscribe(
-      (rawMessage) => {
-        message = rawMessage.toString();
-      }
-    );
-    return message;
+    const message = await this.http.post(urlGameServer + '/connect', formData)
+    .toPromise();
+    return message.toString();
   }
 
-  getInfo(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Observable<GameData> {
+  async getInfo(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Promise<GameData> {
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)
     .set('playerUuid', uuidPlayer);
 
-    return this.http.get<GameData>(urlGameServer + '/getInfo', { params: httpParams });
+    const infoData = await this.http.get<GameData>(urlGameServer + '/getInfo', { params: httpParams })
+    .toPromise();
+    return infoData;
   }
 
-  async getBoard(urlGameServer: any, uuidLobby: string, uuidPlayer: string) {
+  async getBoard(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Promise<Field[][]> {
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)
     .set('playerUuid', uuidPlayer);
-    let chessboard: Board = new Board();
 
-    await this.http.get<Field[][]>(urlGameServer + '/getBoard', { params: httpParams})
-    .subscribe(
-      (rawBoard) => {
-        chessboard.board = rawBoard;
-      }
-    );
-    return chessboard;
+    const board = await this.http.get<Field[][]>(urlGameServer + '/getBoard', { params: httpParams})
+    .toPromise();
+    return board;
   }
 
-  getTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, position: Position): Observable<Movement[]> {
-    const stringifiedPosition = JSON.stringify(position);
+  async getTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, position: Position): Promise<Movement[]> {
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)
     .set('playerUuid', uuidPlayer)
-    .set('position', stringifiedPosition);
+    .set('position', JSON.stringify(position));
 
-    return this.http.get<Movement[]>(urlGameServer + '/getTurn', { params: httpParams});
+    const movementList = await this.http.get<Movement[]>(urlGameServer + '/getTurn', { params: httpParams})
+    .toPromise();
+    return movementList;
   }
 
-  doTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, movement: Movement): Observable<Field[][]> {
-    const stringifiedMovement = JSON.stringify(movement);
+  async doTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, movement: Movement): Promise<Field[][]> {
     const httpParams = new HttpParams()
     .set('lobbyUuid', uuidLobby)
     .set('playerUuid', uuidPlayer)
     .set('movement', JSON.stringify(movement));
 
-    return this.http.post<Field[][]>(urlGameServer + '/doTurn', { headers: httpHeaderOptions, params: httpParams});
+    const board = await this.http.post<Field[][]>(urlGameServer + '/doTurn', { headers: httpHeaderOptions, params: httpParams})
+    .toPromise();
+    return board;
   }
 }

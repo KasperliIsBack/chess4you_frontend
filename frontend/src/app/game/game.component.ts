@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-
-import { Field } from '../data/board/field';
 import { GamehandlerService } from '../service/game/gamehandler.service';
 import { Movement } from '../data/board/movement';
-import { Player } from '../data/player/player';
 import { Position } from '../data/board/position';
-import { GamecontrollerService } from '../service/game/gamecontroller.service';
 import { ConnectionData } from '../data/game/connection-data';
+import { Board } from '../data/board/board';
+import { Const } from '../data/const/const';
+import { tick } from '@angular/core/testing';
 
-const urlGameServer = 'https://172.16.1.198:8081';
+const urlGameServer = new Const().const.getGameUrl();
 
 @Component({
   selector: 'app-game',
@@ -18,40 +17,49 @@ const urlGameServer = 'https://172.16.1.198:8081';
 
 export class GameComponent implements OnInit {
 
-  board: Field[][] = [];
+  constructor(public gameHandler: GamehandlerService) {}
 
-  constructor(
-    private gameHandler: GamehandlerService,
-    private gameController: GamecontrollerService,
-    ) {}
-
+    chessBoard: Board;
     cnData: ConnectionData;
-    chessBoard: ChessBoard;
+    messageList: string[] = ['de'];
+    movementList: Movement[] = [];
     movement: Movement = new Movement();
-    reverse = false;
-    currPos: string;
+    isReverse = false;
+    curPos: string;
     newPos: string;
-    movements: Movement[] = [];
-    info: Info;
 
     async ngOnInit() {
-      this.cnData = history.state.data;
-      console.log(history.state.data);
-      await this.gameController.connect(urlGameServer, this.cnData.lobbyUuid, this.cnData.playerUuid);
+      this.initGame();
     }
 
-    setCoordinate(x: number, y: number) {
-      if (this.reverse) {
+    async initGame(): Promise<void> {
+      // get data from dashboard
+      this.cnData = history.state.data;
+      console.log(history.state.data);
+      // connect to gameserver
+      await this.gameHandler.connect(urlGameServer, this.cnData.lobbyUuid, this.cnData.playerUuid);
+      // get board
+      await this.gameHandler.board
+      .toPromise()
+      .then(
+        (data) => {
+          this.chessBoard = data;
+        }
+      );
+    }
+
+    setImgId(x: number, y: number) {
+      if (this.isReverse) {
         return (7 - y) + ',' + (7 - x);
       }
       return y + ',' + x;
     }
 
-    getImg(field: any, currPiece: any): string {
+    getImgSrc(field: any, currPiece: any): string {
       return !field.piece ? '../assets/chess_board_pieces/transparent.png' : '../assets/chess_board_pieces/' + field.piece.name + '.svg';
     }
 
-    setImg(field: any, currPiece: any): string {
+    setImgSrc(field: any, currPiece: any): string {
       if (!currPiece) {
         return '../assets/chess_board_pieces/' + field.piece.name + '.svg';
       } else {
@@ -59,44 +67,61 @@ export class GameComponent implements OnInit {
       }
     }
 
-    moveFigure(event: Event, field: any) {
+    async movePiece(event: Event, field: any) {
       if (!field.piece) {
-        alert('Bitte wählen Sie eine Figur aus.');
-      } else if (!this.currPos) {
-        this.currPos = (event.target as Element).id;
-        this.getPossiblePositions(this.currPos);
-        this.changeBackgroundColor(this.movements);
-        console.log('currPos: ' + this.currPos);
+
+        this.setInfoMessageForXTick('Bitte wählen Sie eine Spielfigur aus!', 3000);
+      } else if (!this.curPos) {
+
+        await this.showPossiblePosForPiece(event);
       } else if (!this.newPos) {
-        let tmpElement = (event.target as Element);
-        if (this.currPos === tmpElement.id) {
-          alert ('Bitte wählen Sie eine neue Position aus.');
-          console.log('newPos: ' + this.newPos);
-        } else if (tmpElement.classList.contains('has-background-success')) {
-          this.newPos = tmpElement.id;
-          console.log('newPos: ' + this.newPos);
-          this.changeFigure(this.currPos, this.newPos);
-          this.resetBackgroundColor(this.movements);
-        } else {
-          let error = 'Kein valider Zug!';
-        }
+
+        await this.moveToPiece(event);
       }
     }
 
-    async getPossiblePositions(currPos: string) {
-  // tslint:disable-next-line: radix
-      const currY: number = Number.parseInt(currPos.substring(0, 1));
-  // tslint:disable-next-line: radix
-      const currX: number = Number.parseInt(currPos.substring(2, 3));
-      this.movements = new Array();
-      await this.gameHandler.getTurn(urlGameServer, this.cnData.lobbyUuid, this.cnData.playerUuid, new Position(currY, currX))
+    async moveToPiece(event: Event) {
+      const tmpPiece = (event.target as Element);
+
+      if (this.curPos === tmpPiece.id) {
+
+        this.setInfoMessageForXTick('Bitte wählen Sie eine neue Position aus!', 3000);
+        console.log('newPos: ' + this.newPos);
+      } else if (tmpPiece.classList.contains('has-background-success')) {
+
+        this.newPos = tmpPiece.id;
+        this.changeFigure(this.curPos, this.newPos);
+        this.resetBackgroundColor(this.movementList);
+        console.log('newPos: ' + this.newPos);
+      } else {
+
+        this.setInfoMessage('Kein valider Zug!');
+      }
+    }
+
+    async showPossiblePosForPiece(event: Event) {
+      // get id from curPiece
+      this.curPos = (event.target as Element).id;
+      console.log('currPos: ' + this.curPos);
+
+      // fill the movementList and change the background
+      await this.setPossiblePositionsInMovemtList(this.curPos);
+      await this.changeBackgroundColor(this.movementList);
+    }
+
+    async setPossiblePositionsInMovemtList(curPos: string) {
+      // get coordinates
+      const curPosY: number = Number.parseInt(curPos.substring(0, 1), 10);
+      const curPosX: number = Number.parseInt(curPos.substring(2, 3), 10);
+
+      // get and set possible turns
+      await this.gameHandler.getTurn(urlGameServer, this.cnData.lobbyUuid, this.cnData.playerUuid, new Position(curPosY, curPosX))
       .toPromise()
       .then(
         data => {
           console.log(data);
-          this.movements = data;
-        });
-        console.log(this.movements);
+          this.movementList = data;
+      });
     }
 
     changeFigure(curPos: string, newPos: string) {
@@ -107,32 +132,40 @@ export class GameComponent implements OnInit {
       const newPosX: number = Number.parseInt(newPos.substring(2, 3), 10);
 
       // get pieces
-      const curPiece = this.chessBoard.ChessBoard[curPosY][curPosX];
-      const newPiece = this.chessBoard.ChessBoard[newPosY][newPosX];
+      const curPiece = this.chessBoard.board[curPosY][curPosX];
+      const newPiece = this.chessBoard.board[newPosY][newPosX];
 
       // set pieces
-      this.chessBoard.ChessBoard[curPosY][curPosX] = newPiece;
-      this.chessBoard.ChessBoard[newPosY][newPosX] = curPiece;
+      this.chessBoard.board[curPosY][curPosX] = newPiece;
+      this.chessBoard.board[newPosY][newPosX] = curPiece;
     }
 
     resetBackgroundColor(movements: Movement[]) {
       movements.forEach( movement => {
-        document.getElementById(movement.newPosition.PosY + ',' + movement.newPosition.PosX).classList.remove('has-background-success');
+        const pieceId = movement.newPosition.PosY + ',' + movement.newPosition.PosX;
+        document.getElementById(pieceId).classList.remove('has-background-success');
       });
     }
 
     changeBackgroundColor(movements: Movement[]) {
       movements.forEach( movement => {
-        document.getElementById(movement.newPosition.PosY + ',' + movement.newPosition.PosX).classList.add('has-background-success');
+        const pieceId = movement.newPosition.PosY + ',' + movement.newPosition.PosX;
+        document.getElementById(pieceId).classList.add('has-background-success');
       });
     }
-}
 
-export class ChessBoard {
-  ChessBoard: [];
-}
+    setInfoMessageForXTick(message: string, ticks: number): void {
+      this.messageList.push(message);
+      tick(ticks);
+      this.messageList.pop();
+    }
 
-export class Info {
-  currentPlayer: Player;
-  timestamp: Date;
+    setInfoMessage(message: string): void {
+      this.messageList.push(message);
+    }
+
+    onInfoMessageClose(message: string): void {
+      const index = this.messageList.indexOf(message);
+      this.messageList.splice(index, 1);
+    }
 }

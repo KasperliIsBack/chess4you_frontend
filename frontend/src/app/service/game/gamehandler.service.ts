@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GameData } from '../../data/game/game-data';
 import { Board } from '../../data/board/board';
@@ -12,28 +12,30 @@ import { Field } from '../../data/board/field';
 @Injectable({
   providedIn: 'root'
 })
-export class GamehandlerService {
-
+export class GamehandlerService implements OnInit {
   infoData: Observable<GameData>;
-  board: Observable<Board[][]>;
+  board: Observable<Board>;
+  private invterval: number;
 
   constructor(private gamecontrollerService: GamecontrollerService) { }
 
-  connect(urlGameServer: any, uuidLobby: string, uuidPlayer: string) {
-    this.gamecontrollerService
-    .connect(urlGameServer, uuidLobby, uuidPlayer)
-    .then((data) => {
-      return data;
-    });
+  ngOnInit(): void {
+    throw new Error("Method not implemented.");
   }
 
-  getTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, position: Position): Observable<Movement[]> {
-    return this.gamecontrollerService
-    .getTurn(urlGameServer, uuidPlayer, uuidLobby, position);
+  setInterval(interval: number): void {
+    this.invterval = interval;
   }
 
-  doTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, movement: Movement): Observable<Field[][]> {
-    return this.gamecontrollerService
-    .doTurn(urlGameServer, uuidPlayer, uuidLobby, movement);
+  async connect(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Promise<string> {
+    return await this.gamecontrollerService.connect(urlGameServer, uuidLobby, uuidPlayer);
+  }
+
+  async getTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, position: Position): Promise<Movement[]> {
+    return await this.gamecontrollerService.getTurn(urlGameServer, uuidPlayer, uuidLobby, position);
+  }
+
+  async doTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, movement: Movement): Promise<Field[][]> {
+    return await this.gamecontrollerService.doTurn(urlGameServer, uuidPlayer, uuidLobby, movement);
   }
 }

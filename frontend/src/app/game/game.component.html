@@ -2,26 +2,35 @@
   <div class="clr-col-auto clr-align-self-center">
     <div class="card">
       <div class="card-header">
-        <h1>Game: {{true}}</h1>
+        <h1>Game: {{ (this.gameHandler.infoData | async)?.gameName }}</h1>
       </div>
       <div class="card-block">
           <div class="btn-group btn-primary">
-              <button class="btn">{{true}}</button>
+              <button class="btn">{{ (this.gameHandler.infoData | async)?.firstPlayer.playerName }}</button>
               <button class="btn">VS</button>
-              <button class="btn">{{true}}</button>
+              <button class="btn">{{ (this.gameHandler.infoData | async)?.secondPlayer.playerName }}</button>
           </div>
       </div>
       <div class="card-block">
         <h3>Enjoy the game!</h3>
       </div>
-    </div>   
+    </div>
   </div>
     <div class="clr-col-8 clr-align-self-start">
+        <clr-alerts>
+            <clr-alert *ngFor="let message of messageList" [clrAlertType]="'info'" [clrAlertAppLevel]="true" (clrAlertClosedChange)="onInfoMessageClose(message)">
+                <clr-alert-item>
+                <span class="alert-text">
+                    {{ message }}
+                </span>
+            </clr-alert-item>
+            </clr-alert>
+    </clr-alerts>
       <div [hidden]="true" class="board">
         <div *ngFor="let line of this.gameHandler.board | async ; let y = index; let firstEven = even; let firstOdd = odd" class="row">
-          <div (click)="pieceHasClicked($event, field)" *ngFor="let field of line; let x = index; let secondEven = even; let secondOdd = odd" 
-            [ngClass]="((firstEven && secondEven)||(firstOdd && secondOdd))? 'has-background-black field' : 'has-background-white field'">
-            <img id="{{setIdOfImg(x, y)}}" src="{{getImgSrc(field)}}" class="has-image-centered" />
+          <div (click)="movePiece($event, field)" *ngFor="let field of line; let x = index; let secondEven = even; let secondOdd = odd"
+            [ngClass]="((firstEven && secondEven)||(firstOdd && secondOdd))? 'has-background-dark field' : 'has-background-light field'">
+            <img id="{{setImgId(x, y)}}" src="{{getImgSrc(field)}}" class="has-image-centered" />
           </div>
         </div>
       </div>
