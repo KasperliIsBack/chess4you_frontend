@@ -3,6 +3,7 @@ import { Color } from '../enum/color.enum';
 
 export class Lobby {
     lobbyUuid: string;
+    gameDataUuid: string;
     lobbyName: string;
     playerOne: Player;
     colorPlayerOne: Color;

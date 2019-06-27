@@ -1,41 +1,35 @@
-import { Injectable, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
 import { GameData } from '../../data/game/game-data';
-import { Board } from '../../data/board/board';
 import { GamecontrollerService } from './gamecontroller.service';
 import { Position } from '../../data/board/position';
 import { Movement } from '../../data/board/movement';
 import { Field } from '../../data/board/field';
-
-
+import { ConnectionData } from 'src/app/data/game/connection-data';
 
 @Injectable({
   providedIn: 'root'
 })
-export class GamehandlerService implements OnInit {
-  infoData: Observable<GameData>;
-  board: Observable<Board>;
-  private invterval: number;
+export class GamehandlerService {
 
-  constructor(private gamecontrollerService: GamecontrollerService) { }
+  constructor(private gameControllerService: GamecontrollerService) {}
 
-  ngOnInit(): void {
-    throw new Error("Method not implemented.");
+  async connect(cnData: ConnectionData): Promise<string> {
+    return await this.gameControllerService.connect(cnData);
   }
 
-  setInterval(interval: number): void {
-    this.invterval = interval;
+  async getInfo(cnData: ConnectionData): Promise<GameData> {
+    return await this.gameControllerService.getInfo(cnData);
   }
 
-  async connect(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Promise<string> {
-    return await this.gamecontrollerService.connect(urlGameServer, uuidLobby, uuidPlayer);
+  async getBoard(cnData: ConnectionData): Promise<Field[][]> {
+    return await this.gameControllerService.getBoard(cnData);
   }
 
-  async getTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, position: Position): Promise<Movement[]> {
-    return await this.gamecontrollerService.getTurn(urlGameServer, uuidPlayer, uuidLobby, position);
+  async getTurn(cnData: ConnectionData, position: Position): Promise<Movement[]> {
+    return await this.gameControllerService.getTurn(cnData, position);
   }
 
-  async doTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, movement: Movement): Promise<Field[][]> {
-    return await this.gamecontrollerService.doTurn(urlGameServer, uuidPlayer, uuidLobby, movement);
+  async doTurn(cnData: ConnectionData, movement: Movement): Promise<Field[][]> {
+    return await this.gameControllerService.doTurn(cnData, movement);
   }
 }

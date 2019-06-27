@@ -4,10 +4,9 @@ import { Movement } from '../data/board/movement';
 import { Position } from '../data/board/position';
 import { ConnectionData } from '../data/game/connection-data';
 import { Board } from '../data/board/board';
-import { Const } from '../data/const/const';
-import { tick } from '@angular/core/testing';
-
-const urlGameServer = new Const().const.getGameUrl();
+import { Observable } from 'rxjs';
+import { GameData } from '../data/game/game-data';
+import { Field } from '../data/board/field';
 
 @Component({
   selector: 'app-game',
@@ -19,9 +18,12 @@ export class GameComponent implements OnInit {
 
   constructor(public gameHandler: GamehandlerService) {}
 
+    gameData: Observable<GameData>;
+    chessBoardObs: Observable<Board>;
+    interval: number;
     chessBoard: Board;
     cnData: ConnectionData;
-    messageList: string[] = ['de'];
+    messageList: string[] = [];
     movementList: Movement[] = [];
     movement: Movement = new Movement();
     isReverse = false;
@@ -29,23 +31,59 @@ export class GameComponent implements OnInit {
     newPos: string;
 
     async ngOnInit() {
-      this.initGame();
+      await this.initGame();
+      // init observable
+      this.interval = 10000;
+      this.initGameData(this.cnData);
+      this.initBoard(this.cnData);
     }
 
     async initGame(): Promise<void> {
       // get data from dashboard
       this.cnData = history.state.data;
-      console.log(history.state.data);
-      // connect to gameserver
-      await this.gameHandler.connect(urlGameServer, this.cnData.lobbyUuid, this.cnData.playerUuid);
-      // get board
-      await this.gameHandler.board
-      .toPromise()
-      .then(
-        (data) => {
-          this.chessBoard = data;
-        }
-      );
+      if (!this.cnData) {
+        const rawCnData = localStorage.getItem('cnData');
+        console.log(rawCnData);
+
+        this.cnData = JSON.parse(rawCnData);
+      } else {
+        localStorage.setItem('cnData', JSON.stringify(this.cnData));
+        this.cnData = history.state.data;
+        // connect to gameserver
+        await this.gameHandler.connect(this.cnData)
+        .then(
+          (data) => {
+            // tslint:disable-next-line: no-console
+            console.info(data);
+            this.setInfoMessageForXTick(data, 3000);
+          }
+        );
+      }
+      console.log(this.cnData);
+    }
+
+    initGameData(cnData: ConnectionData): void {
+      this.gameData = new Observable(observer => {
+        setInterval(() => {
+            this.gameHandler.getInfo(cnData)
+            .then((data) => {
+              observer.next(data);
+              // console.log(gameData);
+            });
+          }, this.interval);
+      });
+    }
+
+    initBoard(cnData: ConnectionData): void {
+      this.chessBoardObs = new Observable(observer => {
+          setInterval(() => {
+              this.gameHandler.getBoard(cnData)
+              .then((data) => {
+                observer.next(new Board(data));
+                console.log(new Board(data));
+              });
+            }, this.interval);
+        });
     }
 
     setImgId(x: number, y: number) {
@@ -115,8 +153,7 @@ export class GameComponent implements OnInit {
       const curPosX: number = Number.parseInt(curPos.substring(2, 3), 10);
 
       // get and set possible turns
-      await this.gameHandler.getTurn(urlGameServer, this.cnData.lobbyUuid, this.cnData.playerUuid, new Position(curPosY, curPosX))
-      .toPromise()
+      await this.gameHandler.getTurn(this.cnData, new Position(curPosY, curPosX))
       .then(
         data => {
           console.log(data);
@@ -154,10 +191,11 @@ export class GameComponent implements OnInit {
       });
     }
 
-    setInfoMessageForXTick(message: string, ticks: number): void {
+    setInfoMessageForXTick(message: string, timeout: number) {
       this.messageList.push(message);
-      tick(ticks);
-      this.messageList.pop();
+      setTimeout(() => {
+        this.messageList.pop();
+      }, timeout);
     }
 
     setInfoMessage(message: string): void {

@@ -1,9 +1,11 @@
 export class ConnectionData {
-    lobbyUuid: string;
+    gameUuid: string;
+    gameDataUuid: string;
     playerUuid: string;
 
-    constructor(lobbyUuid: string, playerUuid: string) {
-      this.lobbyUuid = lobbyUuid;
+    constructor(gameUuid: string, gameDataUuid: string, playerUuid: string) {
+      this.gameUuid = gameUuid;
+      this.gameDataUuid = gameDataUuid;
       this.playerUuid = playerUuid;
     }
 }

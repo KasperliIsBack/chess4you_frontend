@@ -60,26 +60,27 @@ export class DashboardComponent implements OnInit {
   }
 
   async createGame(): Promise<void> {
-    let connectionData: ConnectionData;
+    let cnData: ConnectionData;
     const lobbyName = this.formGroupCreate.get('lobbyName').value;
     const userName = this.formGroupCreate.get('userName').value;
     const chooseColor = this.formGroupCreate.get('chooseColor').value;
     await this.lobbyHandler.initLobby(lobbyName, userName, chooseColor)
     .then(
       (data) => {
-        connectionData = data;
+        cnData = data;
       }
     );
-    console.log(connectionData);
+    console.log(cnData);
 
-    if (this.isConnectionDataValid(connectionData)) {
+    if (this.isConnectionDataValid(cnData)) {
       this.createBtnState = ClrLoadingState.SUCCESS;
 
       this.router.navigate(['/game'],
       { state:
         { data: {
-          lobbyUuid: connectionData.lobbyUuid,
-          playerUuid: connectionData.playerUuid }
+          gameUuid: cnData.gameUuid,
+          gameDataUuid: cnData.gameDataUuid,
+          playerUuid: cnData.playerUuid }
         }
       });
     } else {
@@ -89,23 +90,24 @@ export class DashboardComponent implements OnInit {
   }
 
   async joinGame(lobby: Lobby): Promise<void> {
-    if (!lobby) {
-        let connectionData: ConnectionData;
+    if (lobby) {
+        let cnData: ConnectionData;
         await this.lobbyHandler.joinLobby(lobby.lobbyUuid, this.formGroupJoin.get('userName').value)
         .then(
           (data) => {
-            connectionData = data;
+            cnData = data;
           }
         );
-        console.log(connectionData);
+        console.log(cnData);
 
-        if (this.isConnectionDataValid(connectionData)) {
+        if (this.isConnectionDataValid(cnData)) {
           this.searchBtnState = ClrLoadingState.DEFAULT;
           this.router.navigate(['/game'],
           { state:
             { data: {
-              lobbyUuid: connectionData.lobbyUuid,
-              playerUuid: connectionData.playerUuid }
+              gameUuid: cnData.gameUuid,
+              gameDataUuid: cnData.gameDataUuid,
+              playerUuid: cnData.playerUuid }
             }
           });
         } else {
@@ -145,10 +147,12 @@ export class DashboardComponent implements OnInit {
     this.formGroupCreate.reset();
   }
 
-  isConnectionDataValid(connectionData: ConnectionData): boolean {
-    if (connectionData.lobbyUuid || 0 === connectionData.lobbyUuid.length) {
-      if (connectionData.playerUuid || 0 === connectionData.playerUuid.length) {
-        return true;
+  isConnectionDataValid(cnData: ConnectionData): boolean {
+    if (cnData.gameUuid || 0 === cnData.gameUuid.length) {
+      if (cnData.gameDataUuid || 0 === cnData.gameDataUuid.length) {
+        if (cnData.playerUuid || 0 === cnData.playerUuid.length) {
+          return true;
+        }
       }
     }
     return false;

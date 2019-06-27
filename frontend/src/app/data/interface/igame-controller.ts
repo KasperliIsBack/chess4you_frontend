@@ -1,11 +1,11 @@
-import { Url } from 'url';
 import { Movement } from '../board/movement';
 import { Position } from '../board/position';
+import { ConnectionData } from '../game/connection-data';
 
 export interface IGameController {
-    connect(urlGameServer: Url, uuidLobby: string, uuidPlayer: string);
-    getInfo(urlGameServer: Url, uuidLobby: string, uuidPlayer: string);
-    getBoard(urlGameServer: Url, uuidLobby: string, uuidPlayer: string);
-    getTurn(urlGameServer: Url, uuidPlayer: string, uuidLobby: string, position: Position);
-    doTurn(urlGameServer: Url, uuidPlayer: string, uuidLobby: string, movement: Movement);
+    connect(cnData: ConnectionData);
+    getInfo(cnData: ConnectionData);
+    getBoard(cnData: ConnectionData);
+    getTurn(cnData: ConnectionData, position: Position);
+    doTurn(cnData: ConnectionData, movement: Movement);
 }

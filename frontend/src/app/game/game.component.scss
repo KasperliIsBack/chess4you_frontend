@@ -2,8 +2,10 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  min-height: 500px;
+  min-width: 500px;
   height: 100%;
-  widows: 100%;
+  width: 100%;
 }
 .row {
   margin: 0px;
@@ -12,8 +14,10 @@
 .field {
   margin: 0px;
   padding: 0px;
-  height: 75px;
-  width: 75px;
+  min-height: 61px;
+  min-width: 61px;
+  height: 11vh;
+  width: 11vh;
 }
 .has-background-dark {
   background-color:#AA4500;
@@ -24,3 +28,4 @@
 .has-background-success{
   background-color: #48960C;
 }
+

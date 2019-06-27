@@ -5,70 +5,59 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Field } from '../../data/board/field';
 import { Movement } from '../../data/board/movement';
 import { Position } from '../../data/board/position';
+import { Const } from 'src/app/data/const/const';
+import { ConnectionData } from 'src/app/data/game/connection-data';
 
-const httpHeaderOptions =  {
-  headers: new HttpHeaders({
-    'Content-Type':  'application/json',
-  })
-};
+const urlGameServer = new Const().const.getGameUrl();
+const httpHeaders =  new HttpHeaders({
+  'Content-Type':  'application/json',
+});
 
 @Injectable({
   providedIn: 'root'
 })
 
-export class GamecontrollerService implements IGameController{
+export class GamecontrollerService implements IGameController {
 
   constructor(private http: HttpClient) { }
 
-  async connect(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Promise<string> {
-    const formData: FormData = new FormData();
-    formData.append('lobbyUuid', uuidLobby);
-    formData.append('playerUuid', uuidPlayer);
-
-    const message = await this.http.post(urlGameServer + '/connect', formData)
+  async connect(cnData: ConnectionData): Promise<string> {
+    const message = await this.http.post(urlGameServer + '/connect', cnData, { headers: httpHeaders, responseType: 'text' })
     .toPromise();
-    return message.toString();
+    return message;
   }
 
-  async getInfo(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Promise<GameData> {
-    const httpParams = new HttpParams()
-    .set('lobbyUuid', uuidLobby)
-    .set('playerUuid', uuidPlayer);
-
-    const infoData = await this.http.get<GameData>(urlGameServer + '/getInfo', { params: httpParams })
+  async getInfo(cnData: ConnectionData): Promise<GameData> {
+    const gameData =  await this.http.get<GameData>(urlGameServer + '/getInfo', { headers: httpHeaders, params: {
+      gameUuid: cnData.gameDataUuid,
+      playerUuid: cnData.playerUuid
+    }})
     .toPromise();
-    return infoData;
+    return gameData;
   }
 
-  async getBoard(urlGameServer: any, uuidLobby: string, uuidPlayer: string): Promise<Field[][]> {
-    const httpParams = new HttpParams()
-    .set('lobbyUuid', uuidLobby)
-    .set('playerUuid', uuidPlayer);
-
-    const board = await this.http.get<Field[][]>(urlGameServer + '/getBoard', { params: httpParams})
+  async getBoard(cnData: ConnectionData): Promise<Field[][]> {
+    const board =  await this.http.get<Field[][]>(urlGameServer + '/getBoard', { headers: httpHeaders , params: {
+      gameUuid: cnData.gameDataUuid,
+      playerUuid: cnData.playerUuid
+    }})
     .toPromise();
     return board;
   }
 
-  async getTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, position: Position): Promise<Movement[]> {
-    const httpParams = new HttpParams()
-    .set('lobbyUuid', uuidLobby)
-    .set('playerUuid', uuidPlayer)
-    .set('position', JSON.stringify(position));
-
-    const movementList = await this.http.get<Movement[]>(urlGameServer + '/getTurn', { params: httpParams})
+  async getTurn(cnData: ConnectionData, position: Position): Promise<Movement[]> {
+    const data = JSON.stringify({cnData, position});
+    return await this.http.get<Movement[]>(urlGameServer + '/getTurn', { headers: httpHeaders , params: {
+      gameUuid: cnData.gameDataUuid,
+      playerUuid: cnData.playerUuid,
+      position: JSON.stringify(position)
+    }})
     .toPromise();
-    return movementList;
   }
 
-  async doTurn(urlGameServer: any, uuidPlayer: string, uuidLobby: string, movement: Movement): Promise<Field[][]> {
-    const httpParams = new HttpParams()
-    .set('lobbyUuid', uuidLobby)
-    .set('playerUuid', uuidPlayer)
-    .set('movement', JSON.stringify(movement));
-
-    const board = await this.http.post<Field[][]>(urlGameServer + '/doTurn', { headers: httpHeaderOptions, params: httpParams})
+  async doTurn(cnData: ConnectionData, movement: Movement): Promise<Field[][]> {
+    const data = JSON.stringify({cnData, movement});
+    return await this.http.post<Field[][]>(urlGameServer + '/doTurn', data, { headers: httpHeaders })
     .toPromise();
-    return board;
   }
 }
