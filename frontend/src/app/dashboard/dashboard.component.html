@@ -34,7 +34,7 @@
             <clr-control-error>Not a valid username</clr-control-error>
           </clr-input-container><br>
           <button [disabled]="formGroupJoin.invalid" [clrLoading]="searchBtnState" type="submit" class="btn btn-lg btn-success-outline" (click)="openSearchGame()">Search</button>
-        </form> 
+        </form>
       </div>
     </div>
   </div>
@@ -62,13 +62,13 @@
         <form [formGroup]="formGroupCreate" clrForm>
           <clr-input-container>
             <label>Username</label>
-            <input clrInput type="text" name="example" required formControlName="lobbyName"/>
+            <input clrInput type="text" name="example" required formControlName="userName"/>
             <clr-control-helper>Enter a username</clr-control-helper>
             <clr-control-error>Not a valid username</clr-control-error>
           </clr-input-container>
           <clr-input-container>
             <label>Gamename</label>
-            <input clrInput type="text" name="example" required formControlName="userName"/>
+            <input clrInput type="text" name="example" required formControlName="lobbyName"/>
             <clr-control-helper>Enter a gamename</clr-control-helper>
             <clr-control-error>Not a valid gamename</clr-control-error>
           </clr-input-container>
@@ -86,7 +86,7 @@
             <clr-control-error>This field is required!</clr-control-error>
           </clr-radio-container><br>
           <button [disabled]="formGroupCreate.invalid" [clrLoading]="createBtnState" type="submit" class="btn btn-lg btn-success-outline" (click)="openCreateGame()">Create</button>
-        </form>  
+        </form>
       </div>
     </div>
   </div>

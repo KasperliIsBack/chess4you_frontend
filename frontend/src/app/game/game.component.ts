@@ -93,8 +93,10 @@ export class GameComponent implements OnInit {
       return y + ',' + x;
     }
 
-    getImgSrc(field: any, currPiece: any): string {
-      return !field.piece ? '../assets/chess_board_pieces/transparent.png' : '../assets/chess_board_pieces/' + field.piece.name + '.svg';
+    getImgSrc(field: Field): string {
+      return !field.piece ? '../assets/chess_board_pieces/transparent.png'
+      : '../assets/chess_board_pieces/'
+      + field.piece.pieceName.slice(field.piece.pieceName.lastIndexOf('.') + 1, field.piece.pieceName.length) + '.svg';
     }
 
     setImgSrc(field: any, currPiece: any): string {
