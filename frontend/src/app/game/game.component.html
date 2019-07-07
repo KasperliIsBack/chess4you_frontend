@@ -3,16 +3,16 @@
     <div class="card">
       <div class="card-header">
         <h1>Game:
-          <span [hidden]="(gameData | async)?.gameName" class="spinner spinner-md" #loading></span>
-          {{ (gameData | async)?.gameName}}
+          <span [hidden]="(gameDataObs | async)?.gameName" class="spinner spinner-md" #loading></span>
+          {{ (gameDataObs | async)?.gameName}}
         </h1>
       </div>
       <div class="card-block">
         <div class="clr-row clr-justify-content-center">
           <div class="clr-col-4">
             <div>
-              <h3><span [hidden]="(gameData | async)?.gameName" class="spinner spinner-inline" #loading></span></h3>
-              <h4>{{ (gameData | async)?.firstPlayer.playerName }}</h4>
+              <h3><span [hidden]="(gameDataObs | async)?.gameName" class="spinner spinner-inline" #loading></span></h3>
+              <h4>{{ (gameDataObs | async)?.firstPlayer.playerName }}</h4>
             </div>
           </div>
           <div class="clr-col-4">
@@ -20,8 +20,8 @@
           </div>
           <div class="clr-col-4">
             <div>
-              <h4><span [hidden]="(gameData | async)?.gameName" class="spinner spinner-inline" #loading></span></h4>
-              <h4>{{ (gameData | async)?.secondPlayer.playerName }}</h4>
+              <h4><span [hidden]="(gameDataObs | async)?.gameName" class="spinner spinner-inline" #loading></span></h4>
+              <h4>{{ (gameDataObs | async)?.secondPlayer.playerName }}</h4>
             </div>
           </div>
         </div>

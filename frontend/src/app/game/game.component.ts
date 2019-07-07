@@ -36,7 +36,7 @@ export class GameComponent implements OnInit {
     async ngOnInit() {
       await this.initGame();
       // init observable
-      this.interval = 10000;
+      this.interval = 5000;
       this.initGameData(this.cnData);
       this.initBoard(this.cnData);
     }
@@ -70,11 +70,8 @@ export class GameComponent implements OnInit {
         setInterval(() => {
             this.gameHandler.getInfo(cnData)
             .then((data) => {
-              if (JSON.stringify(this.gameData) !== JSON.stringify(data)) {
-                this.gameData = data;
-                observer.next(data);
-                console.log(this.gameData);
-              }
+              this.gameData = data;
+              observer.next(data);
             });
           }, this.interval);
       });
@@ -118,10 +115,13 @@ export class GameComponent implements OnInit {
     }
 
     async movePiece(event: Event, field: Field) {
+      console.log(this.gameData);
+      console.log(this.cnData.playerUuid);
+
       if (this.gameData.currentPlayer.playerUuid === this.cnData.playerUuid) {
         if (!this.curPos && !field.piece) {
           this.setInfoMessageForXTick('Bitte wählen Sie eine Spielfigur aus!', 3000);
-        } else if (!this.curPos && field.piece) {
+        } else if (!(!this.curPos && !field.piece)) {
           if (this.isPieceOfThePlayer(this.gameData, field.piece)) {
             await this.showPossiblePosForPiece(event);
           } else {
