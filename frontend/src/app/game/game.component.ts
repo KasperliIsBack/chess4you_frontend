@@ -7,6 +7,8 @@ import { Board } from '../data/board/board';
 import { Observable } from 'rxjs';
 import { GameData } from '../data/game/game-data';
 import { Field } from '../data/board/field';
+import { Piece } from '../data/board/piece';
+import { Color } from '../data/enum/color.enum';
 
 @Component({
   selector: 'app-game',
@@ -18,10 +20,11 @@ export class GameComponent implements OnInit {
 
   constructor(public gameHandler: GamehandlerService) {}
 
-    gameData: Observable<GameData>;
+    gameDataObs: Observable<GameData>;
     chessBoardObs: Observable<Board>;
     interval: number;
     chessBoard: Board;
+    gameData: GameData;
     cnData: ConnectionData;
     messageList: string[] = [];
     movementList: Movement[] = [];
@@ -63,12 +66,15 @@ export class GameComponent implements OnInit {
     }
 
     initGameData(cnData: ConnectionData): void {
-      this.gameData = new Observable(observer => {
+      this.gameDataObs = new Observable(observer => {
         setInterval(() => {
             this.gameHandler.getInfo(cnData)
             .then((data) => {
-              observer.next(data);
-              // console.log(gameData);
+              if (JSON.stringify(this.gameData) !== JSON.stringify(data)) {
+                this.gameData = data;
+                observer.next(data);
+                console.log(this.gameData);
+              }
             });
           }, this.interval);
       });
@@ -79,8 +85,12 @@ export class GameComponent implements OnInit {
           setInterval(() => {
               this.gameHandler.getBoard(cnData)
               .then((data) => {
-                observer.next(new Board(data));
-                console.log(new Board(data));
+                const board = new Board(data);
+                if (JSON.stringify(this.chessBoard) !== JSON.stringify(board)) {
+                  this.chessBoard = board;
+                  observer.next(board);
+                  console.log(this.chessBoard);
+                }
               });
             }, this.interval);
         });
@@ -107,22 +117,38 @@ export class GameComponent implements OnInit {
       }
     }
 
-    async movePiece(event: Event, field: any) {
-      if (!field.piece) {
+    async movePiece(event: Event, field: Field) {
+      if (this.gameData.currentPlayer.playerUuid === this.cnData.playerUuid) {
+        if (!this.curPos && !field.piece) {
+          this.setInfoMessageForXTick('Bitte wählen Sie eine Spielfigur aus!', 3000);
+        } else if (!this.curPos && field.piece) {
+          if (this.isPieceOfThePlayer(this.gameData, field.piece)) {
+            await this.showPossiblePosForPiece(event);
+          } else {
+            this.setInfoMessageForXTick('Wählen Sie ihre Figuren aus!', 3000);
+          }
+        } else if (!this.newPos) {
 
-        this.setInfoMessageForXTick('Bitte wählen Sie eine Spielfigur aus!', 3000);
-      } else if (!this.curPos) {
+          await this.moveToPiece(event);
+        }
+      } else {
 
-        await this.showPossiblePosForPiece(event);
-      } else if (!this.newPos) {
-
-        await this.moveToPiece(event);
+        this.setInfoMessageForXTick('Sie sind nicht an der Reihe!', 3000);
       }
+    }
+
+    isPieceOfThePlayer(gameData: GameData, piece: Piece): boolean {
+      let color: Color;
+      if (gameData.currentPlayer.playerUuid === gameData.firstPlayer.playerUuid) {
+        color = gameData.colorFirstPlayer;
+      } else {
+        color = gameData.colorSecondPlayer;
+      }
+      return color === piece.color ? true : false;
     }
 
     async moveToPiece(event: Event) {
       const tmpPiece = (event.target as Element);
-
       if (this.curPos === tmpPiece.id) {
 
         this.setInfoMessageForXTick('Bitte wählen Sie eine neue Position aus!', 3000);
@@ -133,9 +159,6 @@ export class GameComponent implements OnInit {
         this.changeFigure(this.curPos, this.newPos);
         this.resetBackgroundColor(this.movementList);
         console.log('newPos: ' + this.newPos);
-      } else {
-
-        this.setInfoMessage('Kein valider Zug!');
       }
     }
 
@@ -181,14 +204,14 @@ export class GameComponent implements OnInit {
 
     resetBackgroundColor(movements: Movement[]) {
       movements.forEach( movement => {
-        const pieceId = movement.newPosition.PosY + ',' + movement.newPosition.PosX;
+        const pieceId = movement.newPosition.PosX + ',' + movement.newPosition.PosY;
         document.getElementById(pieceId).classList.remove('has-background-success');
       });
     }
 
     changeBackgroundColor(movements: Movement[]) {
       movements.forEach( movement => {
-        const pieceId = movement.newPosition.PosY + ',' + movement.newPosition.PosX;
+        const pieceId = movement.newPosition.PosX + ',' + movement.newPosition.PosY;
         document.getElementById(pieceId).classList.add('has-background-success');
       });
     }
