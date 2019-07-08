@@ -29,7 +29,6 @@ export class GameComponent implements OnInit {
     messageList: string[] = [];
     movementList: Movement[] = [];
     movement: Movement = new Movement();
-    isReverse = false;
     curPos: string;
     newPos: string;
 
@@ -38,6 +37,12 @@ export class GameComponent implements OnInit {
       // init observable
       this.interval = 5000;
       this.initGameData(this.cnData);
+      await this.gameDataObs.toPromise()
+      .then(
+        (data) => {
+          this.gameData = data;
+        }
+      );
       this.initBoard(this.cnData);
     }
 
@@ -93,11 +98,22 @@ export class GameComponent implements OnInit {
         });
     }
 
-    setImgId(x: number, y: number) {
-      if (this.isReverse) {
-        return (7 - y) + ',' + (7 - x);
+    setImgId(PosY: number, PosX: number): string {
+      if (this.isRevert()) {
+        return (7 - PosY)  + ',' + (7 - PosX);
+      } else {
+        return PosY  + ',' + PosX;
       }
-      return y + ',' + x;
+    }
+
+    isRevert(): boolean {
+      let color: Color;
+      if (this.gameData.firstPlayer.playerUuid === this.cnData.playerUuid) {
+        color = this.gameData.colorFirstPlayer;
+      } else {
+        color = this.gameData.colorSecondPlayer;
+      }
+      return color === Color.White ? true : false;
     }
 
     getImgSrc(field: Field): string {
