@@ -7,7 +7,6 @@ import { Board } from '../data/board/board';
 import { Observable } from 'rxjs';
 import { GameData } from '../data/game/game-data';
 import { Field } from '../data/board/field';
-import { Piece } from '../data/board/piece';
 import { Color } from '../data/enum/color.enum';
 
 @Component({
@@ -20,30 +19,27 @@ export class GameComponent implements OnInit {
 
   constructor(public gameHandler: GamehandlerService) {}
 
-    gameDataObs: Observable<GameData>;
-    chessBoardObs: Observable<Board>;
+    gameData: Observable<GameData>;
+    chessBoard: Observable<Board>;
     interval: number;
-    chessBoard: Board;
-    gameData: GameData;
+    tmpChessBoard: Board;
+    tmpGameData: GameData;
     cnData: ConnectionData;
     messageList: string[] = [];
     movementList: Movement[] = [];
-    movement: Movement = new Movement();
-    curPos: string;
-    newPos: string;
+    isRevert = false;
+    isStepOneDone = false;
+    isFirstCall = true;
+    isGameDataLoaded = false;
+    isChessBoardLoaded = false;
 
     async ngOnInit() {
       await this.initGame();
       // init observable
       this.interval = 5000;
-      this.initGameData(this.cnData);
-      await this.gameDataObs.toPromise()
-      .then(
-        (data) => {
-          this.gameData = data;
-        }
-      );
-      this.initBoard(this.cnData);
+      this.initGameDataObs(this.cnData);
+      await this.setIsRevert();
+      this.initChessBoardObs(this.cnData);
     }
 
     async initGame(): Promise<void> {
@@ -51,8 +47,6 @@ export class GameComponent implements OnInit {
       this.cnData = history.state.data;
       if (!this.cnData) {
         const rawCnData = localStorage.getItem('cnData');
-        console.log(rawCnData);
-
         this.cnData = JSON.parse(rawCnData);
       } else {
         localStorage.setItem('cnData', JSON.stringify(this.cnData));
@@ -67,54 +61,190 @@ export class GameComponent implements OnInit {
           }
         );
       }
-      console.log(this.cnData);
+      this.logData('Get ConnectionData', 'initGame()', this.cnData);
     }
 
-    initGameData(cnData: ConnectionData): void {
-      this.gameDataObs = new Observable(observer => {
+    initGameDataObs(cnData: ConnectionData): void {
+      this.gameData = new Observable(observer => {
         setInterval(() => {
             this.gameHandler.getInfo(cnData)
             .then((data) => {
-              this.gameData = data;
               observer.next(data);
+              if ((this.isFirstCall) || ((!this.tmpGameData.turnDate) || (this.tmpGameData.turnDate !== data.turnDate))) {
+                this.tmpGameData = data;
+                this.logData('Get GameData', 'gameData Observable', this.tmpGameData);
+                this.isFirstCall = false;
+                this.isGameDataLoaded = true;
+              }
             });
           }, this.interval);
       });
     }
 
-    initBoard(cnData: ConnectionData): void {
-      this.chessBoardObs = new Observable(observer => {
+    initChessBoardObs(cnData: ConnectionData): void {
+      this.chessBoard = new Observable(observer => {
           setInterval(() => {
               this.gameHandler.getBoard(cnData)
               .then((data) => {
                 const board = new Board(data);
-                if (JSON.stringify(this.chessBoard) !== JSON.stringify(board)) {
-                  this.chessBoard = board;
+                if (JSON.stringify(this.tmpChessBoard) !== JSON.stringify(board)) {
+                  this.tmpChessBoard = board;
                   observer.next(board);
-                  console.log(this.chessBoard);
+                  this.logData('Get ChessBoard', 'chessBoard Observable', this.tmpChessBoard);
+                  this.isChessBoardLoaded = true;
                 }
               });
             }, this.interval);
         });
     }
 
-    setImgId(PosY: number, PosX: number): string {
-      if (this.isRevert()) {
-        return (7 - PosY)  + ',' + (7 - PosX);
+    async movePiece(event: Event, field: Field) {
+      const tmpGameData = this.tmpGameData;
+      const tmpCnData = this.cnData;
+
+      if (this.isPlayersTurn(tmpGameData, tmpCnData)) {
+        // if the player choose a new possible movement
+        if (this.isStepOneDone &&  this.isSelectionAPiece(field) && this.isPieceOfThePlayer(tmpGameData, field)) {
+          this.resetBackgroundColor(this.movementList);
+          this.isStepOneDone = false;
+        }
+
+        // if the player want to move the piece to a possible movement
+        if (this.isStepOneDone) {
+          console.log("mo");
+
+          const rawPos = (event.target as Element).id;
+          if (this.isPositionInMovementList(this.movementList, rawPos)) {
+            const movement = this.getMovement(this.movementList, rawPos);
+            await this.gameHandler.doTurn(this.cnData, movement)
+            .then((data) => {
+              this.tmpChessBoard = new Board(data);
+            });
+            this.resetBackgroundColor(this.movementList);
+          } else {
+
+            this.setInfoMessageForXTick('Diese Position ist nicht valid!', 3000);
+          }
+        } else { // if the player want show possible movement for a new piece
+          if (this.isSelectionAPiece(field)) {
+            if (this.isPieceOfThePlayer(tmpGameData, field)) {
+              // get position from field
+              const rawPos = (event.target as Element).id;
+              this.movementList = await this.getMovementList(rawPos);
+              this.logData('Get MovementList', 'movePiece', this.movementList);
+              await this.changeBackgroundColor(this.movementList);
+              this.isStepOneDone = true;
+            } else {
+
+              this.setInfoMessageForXTick('Wählen Sie ihre Figuren aus!', 3000);
+            }
+          } else {
+
+            this.setInfoMessageForXTick('Bitte wählen Sie eine Spielfigur aus!', 3000);
+          }
+        }
       } else {
-        return PosY  + ',' + PosX;
+
+        this.setInfoMessageForXTick('Sie sind nicht an der Reihe!', 3000);
       }
     }
 
-    isRevert(): boolean {
-      let color: Color;
-      if (this.gameData.firstPlayer.playerUuid === this.cnData.playerUuid) {
-        color = this.gameData.colorFirstPlayer;
-      } else {
-        color = this.gameData.colorSecondPlayer;
-      }
-      return color === Color.White ? true : false;
+    // Validation operations
+
+    isPlayersTurn(gameData: GameData, cnData: ConnectionData): boolean {
+      return gameData.currentPlayer.playerUuid === cnData.playerUuid ? true : false;
     }
+
+    isSelectionAPiece(field: Field): boolean {
+      return field.isActive ? true : false;
+    }
+
+    isPieceOfThePlayer(gameData: GameData, field: Field): boolean {
+      let color: Color;
+      if (gameData.currentPlayer.playerUuid === gameData.firstPlayer.playerUuid) {
+        color = gameData.colorFirstPlayer;
+      } else {
+        color = gameData.colorSecondPlayer;
+      }
+      return color === field.piece.color ? true : false;
+    }
+
+    isPositionInMovementList(movementList: Movement[], rawPos: string): boolean {
+      // get position
+      const curPos = this.getPosFromString(rawPos);
+      let inList = false;
+      movementList.forEach((movement) => {
+        if (this.arePositionsEqual(movement.newPosition, curPos)) {
+          inList = true;
+        }
+      });
+      return inList;
+    }
+
+    arePositionsEqual(firstPos: Position, secondPos: Position): boolean{
+      return firstPos.PosX === secondPos.PosX && firstPos.PosY === secondPos.PosY ? true : false;
+    }
+
+    // Data operations
+
+    getMovement(movementList: Movement[], rawPos: string): Movement {
+      // get position
+      const curPos = this.getPosFromString(rawPos);
+      let tmpMovement: Movement;
+      movementList.forEach((movement) => {
+        if (this.arePositionsEqual(movement.newPosition, curPos)) {
+          tmpMovement = movement;
+        }
+      });
+      return tmpMovement;
+    }
+
+    async getMovementList(rawPos: string): Promise<Movement[]> {
+      // get position
+      const curPos = this.getPosFromString(rawPos);
+      let tmpMovementList: Movement[] = [];
+
+      // get possible turns
+      await this.gameHandler.getTurn(this.cnData, curPos)
+      .then(
+        data => {
+          tmpMovementList = data;
+      });
+
+      return tmpMovementList;
+    }
+
+    getPosFromString(rawPos: string): Position {
+      const posX: number = Number.parseInt(rawPos.substring(0, 1), 10);
+      const posY: number = Number.parseInt(rawPos.substring(2, 3), 10);
+      return new Position(posX, posY);
+    }
+
+    async setIsRevert() {
+      await this.gameHandler.getInfo(this.cnData)
+      .then(
+        (data) => {
+          this.tmpGameData = data;
+        }
+      );
+      this.logData('Get GameData', 'setIsRevert()', this.tmpGameData);
+
+      let color: Color;
+      if (this.tmpGameData.firstPlayer.playerUuid === this.cnData.playerUuid) {
+        color = this.tmpGameData.colorFirstPlayer;
+      } else {
+        color = this.tmpGameData.colorSecondPlayer;
+      }
+      this.isRevert = color.toString() === 'White' ? true : false;
+      this.logData('Get isRevert value', 'setIsRevert()', this.isRevert);
+    }
+
+    logData(message: string, methodName: string, data: any): void {
+      console.log(message + ' in ' + methodName);
+      console.log(data);
+    }
+
+    // Image operations
 
     getImgSrc(field: Field): string {
       return !field.piece ? '../assets/chess_board_pieces/transparent.png'
@@ -130,93 +260,15 @@ export class GameComponent implements OnInit {
       }
     }
 
-    async movePiece(event: Event, field: Field) {
-      console.log(this.gameData);
-      console.log(this.cnData.playerUuid);
-
-      if (this.gameData.currentPlayer.playerUuid === this.cnData.playerUuid) {
-        if (!this.curPos && !field.piece) {
-          this.setInfoMessageForXTick('Bitte wählen Sie eine Spielfigur aus!', 3000);
-        } else if (!(!this.curPos && !field.piece)) {
-          if (this.isPieceOfThePlayer(this.gameData, field.piece)) {
-            await this.showPossiblePosForPiece(event);
-          } else {
-            this.setInfoMessageForXTick('Wählen Sie ihre Figuren aus!', 3000);
-          }
-        } else if (!this.newPos) {
-
-          await this.moveToPiece(event);
-        }
+    setImgId(PosX: number, PosY: number): string {
+      if (this.isRevert) {
+        return PosX  + ',' + PosY;
       } else {
-
-        this.setInfoMessageForXTick('Sie sind nicht an der Reihe!', 3000);
+        return (7 - PosX)  + ',' + (7 - PosY);
       }
     }
 
-    isPieceOfThePlayer(gameData: GameData, piece: Piece): boolean {
-      let color: Color;
-      if (gameData.currentPlayer.playerUuid === gameData.firstPlayer.playerUuid) {
-        color = gameData.colorFirstPlayer;
-      } else {
-        color = gameData.colorSecondPlayer;
-      }
-      return color === piece.color ? true : false;
-    }
-
-    async moveToPiece(event: Event) {
-      const tmpPiece = (event.target as Element);
-      if (this.curPos === tmpPiece.id) {
-
-        this.setInfoMessageForXTick('Bitte wählen Sie eine neue Position aus!', 3000);
-        console.log('newPos: ' + this.newPos);
-      } else if (tmpPiece.classList.contains('has-background-success')) {
-
-        this.newPos = tmpPiece.id;
-        this.changeFigure(this.curPos, this.newPos);
-        this.resetBackgroundColor(this.movementList);
-        console.log('newPos: ' + this.newPos);
-      }
-    }
-
-    async showPossiblePosForPiece(event: Event) {
-      // get id from curPiece
-      this.curPos = (event.target as Element).id;
-      console.log('currPos: ' + this.curPos);
-
-      // fill the movementList and change the background
-      await this.setPossiblePositionsInMovemtList(this.curPos);
-      await this.changeBackgroundColor(this.movementList);
-    }
-
-    async setPossiblePositionsInMovemtList(curPos: string) {
-      // get coordinates
-      const curPosY: number = Number.parseInt(curPos.substring(0, 1), 10);
-      const curPosX: number = Number.parseInt(curPos.substring(2, 3), 10);
-
-      // get and set possible turns
-      await this.gameHandler.getTurn(this.cnData, new Position(curPosY, curPosX))
-      .then(
-        data => {
-          console.log(data);
-          this.movementList = data;
-      });
-    }
-
-    changeFigure(curPos: string, newPos: string) {
-      // get all positions
-      const curPosY: number = Number.parseInt(curPos.substring(0, 1), 10);
-      const curPosX: number = Number.parseInt(curPos.substring(2, 3), 10);
-      const newPosY: number = Number.parseInt(newPos.substring(0, 1), 10);
-      const newPosX: number = Number.parseInt(newPos.substring(2, 3), 10);
-
-      // get pieces
-      const curPiece = this.chessBoard.board[curPosY][curPosX];
-      const newPiece = this.chessBoard.board[newPosY][newPosX];
-
-      // set pieces
-      this.chessBoard.board[curPosY][curPosX] = newPiece;
-      this.chessBoard.board[newPosY][newPosX] = curPiece;
-    }
+    // Background operations
 
     resetBackgroundColor(movements: Movement[]) {
       movements.forEach( movement => {
@@ -231,6 +283,8 @@ export class GameComponent implements OnInit {
         document.getElementById(pieceId).classList.add('has-background-success');
       });
     }
+
+    // Message operations
 
     setInfoMessageForXTick(message: string, timeout: number) {
       this.messageList.push(message);

@@ -7,6 +7,7 @@ import { Movement } from '../../data/board/movement';
 import { Position } from '../../data/board/position';
 import { Const } from 'src/app/data/const/const';
 import { ConnectionData } from 'src/app/data/game/connection-data';
+import { TurnDto } from 'src/app/data/game/turn-dto';
 
 const urlGameServer = new Const().const.getGameUrl();
 const httpHeaders =  new HttpHeaders({
@@ -56,8 +57,8 @@ export class GamecontrollerService implements IGameController {
   }
 
   async doTurn(cnData: ConnectionData, movement: Movement): Promise<Field[][]> {
-    const data = JSON.stringify({cnData, movement});
-    return await this.http.post<Field[][]>(urlGameServer + '/doTurn', data, { headers: httpHeaders })
+    const turnDto: TurnDto = new TurnDto(cnData, movement);
+    return await this.http.post<Field[][]>(urlGameServer + '/doTurn', turnDto, { headers: httpHeaders })
     .toPromise();
   }
 }

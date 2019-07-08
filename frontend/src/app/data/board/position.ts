@@ -4,6 +4,6 @@ export class Position {
 
     constructor(PosX: number, PosY: number) {
         this.PosX = PosX;
-        this.PosY = PosY;   
+        this.PosY = PosY;
     }
 }

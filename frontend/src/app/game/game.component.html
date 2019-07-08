@@ -3,16 +3,16 @@
     <div class="card">
       <div class="card-header">
         <h1>Game:
-          <span [hidden]="(gameDataObs | async)?.gameName" class="spinner spinner-md" #loading></span>
-          {{ (gameDataObs | async)?.gameName}}
+          <span [hidden]="isGameDataLoaded" class="spinner spinner-md" #loading></span>
+          {{ (gameData | async)?.gameName}}
         </h1>
       </div>
       <div class="card-block">
         <div class="clr-row clr-justify-content-center">
           <div class="clr-col-4">
             <div>
-              <h3><span [hidden]="(gameDataObs | async)?.gameName" class="spinner spinner-inline" #loading></span></h3>
-              <h4>{{ (gameDataObs | async)?.firstPlayer.playerName }}</h4>
+              <h3><span [hidden]="isGameDataLoaded" class="spinner spinner-inline" #loading></span></h3>
+              <h4>{{ (gameData | async)?.firstPlayer.playerName }}</h4>
             </div>
           </div>
           <div class="clr-col-4">
@@ -20,8 +20,8 @@
           </div>
           <div class="clr-col-4">
             <div>
-              <h4><span [hidden]="(gameDataObs | async)?.gameName" class="spinner spinner-inline" #loading></span></h4>
-              <h4>{{ (gameDataObs | async)?.secondPlayer.playerName }}</h4>
+              <h4><span [hidden]="isGameDataLoaded" class="spinner spinner-inline" #loading></span></h4>
+              <h4>{{ (gameData | async)?.secondPlayer.playerName }}</h4>
             </div>
           </div>
         </div>
@@ -43,11 +43,12 @@
       </clr-alert>
     </clr-alerts>
     <div class="board">
-      <div *ngFor="let row of (chessBoardObs | async)?.board ; let PosY = index; let IsRowDark = even; let IsRowLight = odd" class="row has-flex-box has-no-space">
+      <span [hidden]="isChessBoardLoaded" class="spinner spinner-lg"></span>
+      <div *ngFor="let row of (chessBoard | async)?.board ; let PosY = index; let IsRowDark = even; let IsRowLight = odd" class="row has-flex-box has-no-space">
         <div *ngFor="let field of row; let PosX = index; let IsFieldDark = even; let IsFieldLight = odd"
         class="field has-no-space"
         [ngClass]="( (IsRowDark && IsFieldDark) || (IsRowLight && IsFieldLight) )? 'has-background-dark' : 'has-background-light'">
-          <img (click)="movePiece($event, field)" id="{{setImgId(PosY, PosX)}}" src="{{getImgSrc(field)}}" class="has-image-centered" />
+          <img (click)="movePiece($event, field)" id="{{setImgId(PosX, PosY)}}" src="{{getImgSrc(field)}}" class="has-image-centered" />
         </div>
       </div>
     </div>
