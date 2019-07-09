@@ -1,7 +1,7 @@
 // variables board
 $board-height: 80vh;
-$min-board-height: 400px;
-$board-widht: 80vh;
+$min-board-height: 450px;
+$board-width: 85vh;
 $min-board-width: 400px;
 
 // variables row
@@ -16,12 +16,22 @@ $min-field-height: 50px;
 $field-width: 10vh;
 $min-field-width: 50px;
 
+.alert-width {
+  margin-left: 0px;
+  margin-right: 0px;
+  width: 94.25%;
+  height: 100%;
+}
+.box{
+  width: 100%;
+  height: 37.6px;
+}
 
 .board {
   min-height: $min-board-height;
   min-width: $min-board-width;
   height: $board-height;
-  width: $board-widht;
+  width: $board-width;
   margin-left: 25%;
 }
 .has-flex-box {
@@ -56,8 +66,11 @@ $min-field-width: 50px;
 .has-background-light {
   background-color:#FFCD97;
 }
-.has-background-success{
-  background-color: #48960C;
+.has-background-success-light{
+  background-color: rgba(255, 205, 151, 0.4);
+}
+.has-background-success-dark{
+  background-color: rgba(170, 69, 0, 0.4);
 }
 .has-image-centered{
   margin: 0 auto;
