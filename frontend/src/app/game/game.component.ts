@@ -76,7 +76,7 @@ export class GameComponent implements OnInit {
               observer.next(data);
               if ((this.isFirstCall) || ((!this.tmpGameData.turnDate) || (this.tmpGameData.turnDate !== data.turnDate))) {
                 this.tmpGameData = data;
-                this.logData('Get GameData', 'gameData Observable', this.tmpGameData);
+                // this.logData('Get GameData', 'gameData Observable', this.tmpGameData);
                 this.isFirstCall = false;
                 this.isGameDataLoaded = true;
               }
@@ -93,7 +93,7 @@ export class GameComponent implements OnInit {
                 const board = new Board(data);
                 this.tmpChessBoard = board;
                 observer.next(board);
-                this.logData('Get ChessBoard', 'chessBoard Observable', this.tmpChessBoard);
+                // this.logData('Get ChessBoard', 'chessBoard Observable', this.tmpChessBoard);
                 this.isChessBoardLoaded = true;
               });
             }, 1000);
@@ -120,7 +120,7 @@ export class GameComponent implements OnInit {
             .then((data) => {
               this.tmpChessBoard = new Board(data);
             });
-            this.movementList = this.resetBackgroundColor(this.movementList);
+            this.movementList = [];
           } else {
 
             this.setInfoMessageForXTick('Diese Position ist nicht valid!', 3000);
@@ -130,10 +130,9 @@ export class GameComponent implements OnInit {
             if (this.isPieceOfThePlayer(tmpGameData, field)) {
               // get position from field
               const rawPos = (event.target as Element).id;
-              this.movementList = new Array(0);
+              this.movementList = [];
               this.movementList = await this.getMovementList(rawPos);
               this.logData('Get MovementList', 'movePiece', this.movementList);
-              await this.changeBackgroundColor(this.movementList);
               this.isStepOneDone = true;
             } else {
 
@@ -269,26 +268,23 @@ export class GameComponent implements OnInit {
       }
     }
 
-    // Background operations
-
-    resetBackgroundColor(movements: Movement[]): Movement[] {
-      return movements = new Array(0);
-    }
-
-    changeBackgroundColor(movements: Movement[]): void {
-      movements.forEach( movement => {
-        const pieceId = movement.newPosition.PosX + ',' + movement.newPosition.PosY;
-        document.getElementById(pieceId).classList.add('has-background-success');
-      });
-    }
-
 // tslint:disable-next-line: max-line-length
     setBackground(IsRowDark: boolean, IsFieldDark: boolean, IsRowLight: boolean, IsFieldLight: boolean, posX: number, posY: number): string {
       if (this.movementList.length > 0) {
-        for (const movement of this.movementList) {
-          if (movement.newPosition.PosX === posX && movement.newPosition.PosY === posY) {
-// tslint:disable-next-line: max-line-length
-            return (IsRowDark && IsFieldDark) || (IsRowLight && IsFieldLight) ? 'has-background-success-light' : 'has-background-success-dark';
+        const movementList: Movement[] = this.movementList;
+        if (!this.isRevert) {
+          for (const movement of movementList) {
+            if ((7 - movement.newPosition.PosX) === posX && (7 - movement.newPosition.PosY) === posY) {
+  // tslint:disable-next-line: max-line-length
+              return (IsRowDark && IsFieldDark) || (IsRowLight && IsFieldLight) ? 'has-background-success-light' : 'has-background-success-dark';
+            }
+          }
+        } else {
+          for (const movement of movementList) {
+            if (movement.newPosition.PosX === posX && movement.newPosition.PosY === posY) {
+  // tslint:disable-next-line: max-line-length
+              return (IsRowDark && IsFieldDark) || (IsRowLight && IsFieldLight) ? 'has-background-success-light' : 'has-background-success-dark';
+            }
           }
         }
       }
